@@ -6,21 +6,6 @@ class Playground {
         // This creates a basic Babylon Scene object (non-mesh)
         var scene = new BABYLON.Scene(engine);
 
-        // This creates and positions a free camera (non-mesh)
-        var camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 5, -10), scene);
-
-        // This targets the camera to scene origin
-        camera.setTarget(BABYLON.Vector3.Zero());
-
-        // This attaches the camera to the canvas
-        camera.attachControl(canvas, true);
-
-        // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
-        var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
-
-        // Default intensity is 1. Let's dim the light a small amount
-        light.intensity = 0.7;
-
         // Our built-in 'sphere' shape. Params: name, subdivs, size, scene
         var sphere = BABYLON.Mesh.CreateSphere("sphere1", 16, 2, scene);
 
@@ -29,6 +14,43 @@ class Playground {
 
         // Our built-in 'ground' shape. Params: name, width, depth, subdivs, scene
         var ground = BABYLON.Mesh.CreateGround("ground1", 6, 6, 2, scene);
+
+        const outdoorTexture = BABYLON.CubeTexture.CreateFromPrefilteredData("http://localhost:8181/outdoor.env", scene);
+        const fireTexture = BABYLON.CubeTexture.CreateFromPrefilteredData("http://localhost:8181/diamond_fire.env", scene);
+        scene.environmentTexture = outdoorTexture;
+
+        const mat = new BABYLON.PBRMaterial("", scene);
+        mat.metallic = 1;
+        mat.roughness = 1;
+        mat.albedoColor = new BABYLON.Color3(0.1, 0.1, 0.4);
+        sphere.material = mat;
+        ground.material = mat;
+
+        BABYLON.SceneLoader.AppendAsync("http://localhost:8181/diamond.glb", undefined, scene).then(() => {
+            const diamond = scene.getMeshByName("diamond")!;
+            const diamondRoot = (diamond.parent! as BABYLON.AbstractMesh);
+            const diamondMat = diamond.material as BABYLON.PBRMaterial;
+            //diamondMat.albedoColor = new BABYLON.Color3(1, 1, 0);
+            
+            const fireMat = scene.getMeshByName("fire")!.material as BABYLON.PBRMaterial;
+            fireMat.reflectionTexture = fireTexture;
+            fireMat.refractionTexture = fireTexture;
+
+            scene.onBeforeRenderObservable.runCoroutineAsync(function* () {
+                diamond.rotate(BABYLON.Vector3.RightReadOnly, 0.4);
+                diamondRoot.position.y += 2.1;
+                diamondRoot.scaling.scaleInPlace(0.1);
+                while (true) {
+                    diamondRoot.rotate(BABYLON.Vector3.UpReadOnly, 0.01);
+                    yield;
+                }
+            }());
+        });
+
+        scene.createDefaultCamera(true, true, true);
+        
+        const bloom = new BABYLON.BloomEffect(scene, 100, 100, 10);
+        bloom.threshold = 0.1;
 
         return scene;
     }
