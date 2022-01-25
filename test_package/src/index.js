@@ -28,7 +28,8 @@ if (DEV_BUILD) {
 }
 initializeVaporwearExperience({ 
     canvas: canvas, 
-    assetUrlWatch: assetsHostUrl + "watch.glb",
-    assetUrlEnvironmentTexture: assetsHostUrl + "outdoor.env",
-    assetUrlDiamondFireTexture: assetsHostUrl + "diamond_fire.env",
+    assetUrlRoot: assetsHostUrl,
+    assetUrlWatch: "watch.glb",
+    assetUrlEnvironmentTexture: "outdoor.env",
+    assetUrlDiamondFireTexture: "diamond_fire.env",
 });

@@ -3,7 +3,6 @@ import "@babylonjs/gui";
 import "@babylonjs/inspector";
 
 import { Engine } from "@babylonjs/core";
-import { CreatePlaygroundSceneAsync } from "./Playground/playground";
 import { ShowroomScene } from "./showroomScene";
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
 

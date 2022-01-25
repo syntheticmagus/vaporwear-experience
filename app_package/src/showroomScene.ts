@@ -1,5 +1,6 @@
 import { AbstractMesh, Color3, CubeTexture, Engine, FreeCamera, PBRMaterial, Scene, SceneLoader, Tools, TransformNode, Vector3 } from "@babylonjs/core";
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
+import { Watch } from "./watch";
 
 export enum ShowroomSceneStates {
     Overall,
@@ -23,11 +24,19 @@ export class ShowroomScene extends Scene {
         scene.clearColor = Color3.White().toColor4();
         scene.skipFrustumClipping = true;
 
-        const environmentTexture = CubeTexture.CreateFromPrefilteredData("http://localhost:8181/outdoor.env", scene);
-        const fireTexture = CubeTexture.CreateFromPrefilteredData("http://localhost:8181/diamond_fire.env", scene);
+        const environmentTexture = CubeTexture.CreateFromPrefilteredData(params.assetUrlRoot + params.assetUrlEnvironmentTexture, scene);
+        const fireTexture = CubeTexture.CreateFromPrefilteredData(params.assetUrlRoot + params.assetUrlDiamondFireTexture, scene);
         scene.environmentTexture = environmentTexture;
 
-        await SceneLoader.AppendAsync("http://localhost:8181/watch.glb", undefined, scene);
+        const watch = await Watch.createAsync(scene, params);
+
+        watch.spinDown();
+        watch.spinUp();
+        watch.spinDown();
+        watch.spinDown();
+        watch.spinUp();
+
+        /*await SceneLoader.AppendAsync("http://localhost:8181/watch.glb", undefined, scene);
         const spinUp = scene.getAnimationGroupByName("spin-up")!;
         const spinDown = scene.getAnimationGroupByName("spin-down")!;
         spinUp.stop();
@@ -58,11 +67,11 @@ export class ShowroomScene extends Scene {
                 diamondRoot.rotate(Vector3.UpReadOnly, 0.01);
                 yield;
             }
-        }());
+        }());*/
 
-        //scene.createDefaultCamera(true, true, true);
+        scene.createDefaultCamera(true, true, true);
         
-        const names = ["camera_overall", "camera_clasp", "camera_face", "camera_levitate"];
+        /*const names = ["camera_overall", "camera_clasp", "camera_face", "camera_levitate"];
         const camera = new FreeCamera("freeCamera", Vector3.Zero(), scene, true);
         const cameraParent = scene.getTransformNodeByName(names[3])!;
         cameraParent.scaling.z *= -1;
@@ -75,7 +84,7 @@ export class ShowroomScene extends Scene {
                 (cameraParent.parent! as TransformNode).rotate(Vector3.UpReadOnly, 0.01);
                 yield;
             }
-        }());
+        }());*/
 
         return scene;
     }
