@@ -1,4 +1,4 @@
-import { AnimationGroup, ISceneLoaderAsyncResult, MeshBuilder, Scene, SceneLoader, TransformNode, Vector3 } from "@babylonjs/core";
+import { AnimationGroup, ISceneLoaderAsyncResult, MeshBuilder, Quaternion, Scene, SceneLoader, TransformNode, Vector3 } from "@babylonjs/core";
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
 
 enum WatchAnimationState {
