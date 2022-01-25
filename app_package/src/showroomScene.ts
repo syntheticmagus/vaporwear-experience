@@ -30,12 +30,6 @@ export class ShowroomScene extends Scene {
 
         const watch = await Watch.createAsync(scene, params);
 
-        watch.spinDown();
-        watch.spinUp();
-        watch.spinDown();
-        watch.spinDown();
-        watch.spinUp();
-
         /*await SceneLoader.AppendAsync("http://localhost:8181/watch.glb", undefined, scene);
         const spinUp = scene.getAnimationGroupByName("spin-up")!;
         const spinDown = scene.getAnimationGroupByName("spin-down")!;
