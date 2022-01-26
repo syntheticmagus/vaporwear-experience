@@ -69,7 +69,7 @@ export class Watch extends TransformNode {
         scene.onBeforeRenderObservable.runCoroutineAsync(function* () {
             while (true) {
                 cameraParents.forEach((parent) => {
-                    (parent.parent! as TransformNode).rotate(Vector3.UpReadOnly, 0.01);
+                    (parent.parent! as TransformNode).rotate(Vector3.UpReadOnly, -0.01);
                 });
                 yield;
             }

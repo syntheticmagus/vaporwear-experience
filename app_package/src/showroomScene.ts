@@ -32,22 +32,36 @@ export class ShowroomScene extends Scene {
         const watch = await Watch.createAsync(scene, params);
 
         const defaultFocus = new TransformNode("defaultFocus", scene);
-        defaultFocus.position.y = 2;
-        const camera = new ShowroomCamera(scene, defaultFocus, params);
+        defaultFocus.position.y = 1;
+        const camera = new ShowroomCamera(scene, watch.cameraParentOverall, params);
 
-        Tools.DelayAsync(3000).then(() => {
-            camera.activate();
-            return Tools.DelayAsync(5000);
-        }).then(() => {
-            watch.setPoseDown();
-            camera.deactivate();
-            camera.setTrackingTransform(watch.cameraParentOverall);
-            return Tools.DelayAsync(5000);
-        }).then(() => {
-            watch.setPoseUp();
-            camera.activate();
-            camera.setTrackingTransform(defaultFocus);
-        });
+        const testAsync = async function () {
+            while (true) {
+                await Tools.DelayAsync(5000);
+                camera.setTrackingTransform(watch.cameraParentOverall);
+                await Tools.DelayAsync(5000);
+                camera.setTrackingTransform(watch.cameraParentClasp);
+                await Tools.DelayAsync(5000);
+                watch.setPoseDown();
+                camera.setTrackingTransform(watch.cameraParentFace);
+                await Tools.DelayAsync(5000);
+                camera.setTrackingTransform(watch.cameraParentLevitate);
+                await Tools.DelayAsync(5000);
+                watch.setPoseUp();
+                camera.setTrackingTransform(defaultFocus);
+                camera.activate();
+                await Tools.DelayAsync(20000);
+                camera.deactivate();
+                camera.setTrackingTransform(watch.cameraParentLevitate);
+                watch.setPoseDown();
+                await Tools.DelayAsync(2000);
+                camera.setTrackingTransform(watch.cameraParentFace);
+                await Tools.DelayAsync(2000);
+                watch.setPoseUp();
+                camera.setTrackingTransform(watch.cameraParentClasp);
+            }
+        };
+        testAsync();
 
         return scene;
     }
