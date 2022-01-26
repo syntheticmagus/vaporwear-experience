@@ -42,7 +42,7 @@ export class Watch extends TransformNode {
         
         this._animationState = WatchAnimationState.Up;
         this._animationTargetState = WatchAnimationState.Up;
-
+        
         this._animationSpinDown = importMeshResult.animationGroups[0];
         this._animationSpinDown.stop();
         this._animationSpinDown.loopAnimation = false;

@@ -1,4 +1,4 @@
-import { ArcFollowCamera, ArcRotateCamera, Camera, FreeCamera, Matrix, Quaternion, Scene, TransformNode, Vector3, Vector4 } from "@babylonjs/core";
+import { ArcRotateCamera, FreeCamera, Quaternion, Scene, TransformNode, Vector3 } from "@babylonjs/core";
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
 
 export class ShowroomCamera extends TransformNode {
@@ -21,6 +21,8 @@ export class ShowroomCamera extends TransformNode {
         this._configCamera.lowerBetaLimit = 0.2;
         this._configCamera.minZ = 0.01;
         this._configCamera.maxZ = 100;
+        this._configCamera.lowerRadiusLimit = 3;
+        this._configCamera.upperRadiusLimit = 15;
         this._configCamera.fov = 0.6;
         
         this._showCamera = new FreeCamera("showCamera", Vector3.Zero(), scene, true);
