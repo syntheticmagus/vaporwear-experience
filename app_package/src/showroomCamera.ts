@@ -1,9 +1,9 @@
-import { ArcRotateCamera, Quaternion, Scene, TransformNode, Vector3, Vector4 } from "@babylonjs/core";
-import { ThinSprite } from "@babylonjs/core/Sprites/thinSprite";
+import { ArcFollowCamera, ArcRotateCamera, Camera, FreeCamera, Matrix, Quaternion, Scene, TransformNode, Vector3, Vector4 } from "@babylonjs/core";
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
 
 export class ShowroomCamera extends TransformNode {
-    private _camera: ArcRotateCamera;
+    private _configCamera: ArcRotateCamera;
+    private _showCamera: FreeCamera;
 
     private _trackingTransform: TransformNode;
     private _trackingFormerPosition: Vector3;
@@ -12,15 +12,22 @@ export class ShowroomCamera extends TransformNode {
     private _trackingTransformReset: boolean;
 
     public constructor(scene: Scene, trackingTransform: TransformNode, params: IVaporwearExperienceParams) {
-        super("showroomCameraRoot", scene);
+        super("configCameraRoot", scene);
         this.rotationQuaternion = Quaternion.Identity();
 
-        this._camera = new ArcRotateCamera("showroomCamera", -Math.PI / 2, Math.PI / 2, 0, Vector3.Zero(), scene, true);
-        this._camera.upperBetaLimit = Math.PI - 0.2;
-        this._camera.lowerBetaLimit = 0.2;
-        this._camera.minZ = 0.01;
-        this._camera.maxZ = 100;
-        this._camera.parent = this;
+        this._configCamera = new ArcRotateCamera("configCamera", -Math.PI / 2, Math.PI / 2, 0, Vector3.Zero(), scene, false);
+        this._configCamera.rotationQuaternion = Quaternion.Identity();
+        this._configCamera.upperBetaLimit = Math.PI - 0.2;
+        this._configCamera.lowerBetaLimit = 0.2;
+        this._configCamera.minZ = 0.01;
+        this._configCamera.maxZ = 100;
+        this._configCamera.fov = 0.6;
+        
+        this._showCamera = new FreeCamera("showCamera", Vector3.Zero(), scene, true);
+        this._showCamera.minZ = 0.01;
+        this._showCamera.maxZ = 100;
+        this._showCamera.fov = 0.6;
+        this._showCamera.parent = this;
 
         this._trackingTransform = trackingTransform;
         this._trackingFormerFocus = new Vector3();
@@ -32,11 +39,35 @@ export class ShowroomCamera extends TransformNode {
     }
 
     public activate(): void {
-        this._activateAsync();
+        const target = new Vector3();
+        this.getFocusToRef(this._trackingTransform, target);
+
+        this._configCamera.radius = 0;
+        this._configCamera.alpha = -Math.PI / 2;
+        this._configCamera.beta = Math.PI / 2;
+        this._configCamera.position.copyFrom(this.position);
+        this._configCamera.setTarget(target);
+        
+        this._scene.setActiveCameraByName("configCamera");
+        this._trackingTransform = this;
+        this._configCamera.attachControl();
     }
 
     public deactivate(): void {
-        this._deactivateAsync();
+        const cameraWorldMatrix = this._configCamera.getWorldMatrix();
+        this.position.copyFromFloats(cameraWorldMatrix.m[12], cameraWorldMatrix.m[13], cameraWorldMatrix.m[14]);
+        const forward = new Vector3(
+            cameraWorldMatrix.m[8],
+            cameraWorldMatrix.m[9],
+            cameraWorldMatrix.m[10]);
+        const up = new Vector3(
+            cameraWorldMatrix.m[4],
+            cameraWorldMatrix.m[5],
+            cameraWorldMatrix.m[6]);
+        Quaternion.FromLookDirectionRHToRef(forward, up, this.rotationQuaternion!);
+        this._scene.setActiveCameraByName("showCamera");
+        this._trackingTransform = this;
+        this._configCamera.detachControl();
     }
 
     public setTrackingTransform(trackingTransform: TransformNode): void {
@@ -96,74 +127,6 @@ export class ShowroomCamera extends TransformNode {
                 yield;
             }
         }
-    }
-
-    private *_animateCameraCoroutine(alpha0: number, alpha1: number, beta0: number, beta1: number, radius0: number, radius1: number) {
-        let t: number;
-        const FRAMES_COUNT = 60;
-        for (let idx = 0; idx <= FRAMES_COUNT; ++idx) {
-            t = idx / FRAMES_COUNT;
-            this._camera.alpha = (1 - t) * alpha0 + t * alpha1;
-            this._camera.beta = (1 - t) * beta0 + t * beta1;
-            this._camera.radius = (1 - t) * radius0 + t * radius1;
-            yield;
-        }
-    }
-
-    private _truncateAlphaAndBeta(): void {
-        const alphaSign = Math.sign(this._camera.alpha);
-        const betaSign = Math.sign(this._camera.beta);
-
-        this._camera.alpha *= alphaSign;
-        this._camera.beta *= betaSign;
-
-        const FULL_CIRCLE = Math.PI * 2;
-        this._camera.alpha = (this._camera.alpha + FULL_CIRCLE) % FULL_CIRCLE;
-        this._camera.beta = (this._camera.beta + FULL_CIRCLE) % FULL_CIRCLE;
-
-        if (this._camera.alpha > Math.PI) {
-            this._camera.alpha -= FULL_CIRCLE;
-        }
-        if (this._camera.beta > Math.PI) {
-            this._camera.beta -= FULL_CIRCLE;
-        }
-        
-        this._camera.alpha *= alphaSign;
-        this._camera.beta *= betaSign;
-    }
-
-    private async _activateAsync(): Promise<void> {
-        this._truncateAlphaAndBeta();
-        const alpha0 = this._camera.alpha;
-        const beta0 = this._camera.beta;
-        const radius0 = this._camera.radius;
-
-        const alpha1 = -Math.PI / 2;
-        const beta1 = 1;
-        const radius1 = 7;
-
-        const animateCoroutine = this._animateCameraCoroutine(alpha0, alpha1, beta0, beta1, radius0, radius1);
-        await this._scene.onBeforeRenderObservable.runCoroutineAsync(animateCoroutine);
-        
-        this._camera.lowerRadiusLimit = 2;
-        this._camera.attachControl();
-    }
-
-    private async _deactivateAsync(): Promise<void> {
-        this._truncateAlphaAndBeta();
-        const alpha0 = this._camera.alpha;
-        const beta0 = this._camera.beta;
-        const radius0 = this._camera.radius;
-
-        const alpha1 = -Math.PI / 2;
-        const beta1 = Math.PI / 2;
-        const radius1 = 0;
-
-        this._camera.lowerRadiusLimit = 0;
-        this._camera.detachControl();
-
-        const animateCoroutine = this._animateCameraCoroutine(alpha0, alpha1, beta0, beta1, radius0, radius1);
-        await this._scene.onBeforeRenderObservable.runCoroutineAsync(animateCoroutine);
     }
 
     private getFocusToRef(transformNode: TransformNode, focus: Vector3)

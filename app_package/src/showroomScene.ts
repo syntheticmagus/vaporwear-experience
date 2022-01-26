@@ -48,9 +48,10 @@ export class ShowroomScene extends Scene {
                 camera.setTrackingTransform(watch.cameraParentLevitate);
                 await Tools.DelayAsync(5000);
                 watch.setPoseUp();
-                camera.setTrackingTransform(defaultFocus);
+                camera.setTrackingTransform(watch.cameraParentOverall);
+                await Tools.DelayAsync(1200);
                 camera.activate();
-                await Tools.DelayAsync(20000);
+                await Tools.DelayAsync(10000);
                 camera.deactivate();
                 camera.setTrackingTransform(watch.cameraParentLevitate);
                 watch.setPoseDown();
