@@ -32,7 +32,7 @@ export class ShowroomScene extends Scene {
         const watch = await Watch.createAsync(scene, params);
 
         const defaultFocus = new TransformNode("defaultFocus", scene);
-        defaultFocus.position.y = 1;
+        defaultFocus.position.y = 1.5;
         const camera = new ShowroomCamera(scene, watch.cameraParentOverall, params);
 
         const testAsync = async function () {
