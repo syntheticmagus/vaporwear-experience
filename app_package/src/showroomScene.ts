@@ -1,7 +1,7 @@
 import { Color3, CubeTexture, Engine, Scene, Tools, TransformNode } from "@babylonjs/core";
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
-import { ShowroomCamera } from "./showroomCamera";
 import { Watch } from "./watch";
+import { IShowroomCameraArcRotateState, IShowroomCameraMatchmoveState, ShowroomCamera } from "@syntheticmagus/showroom-scene";
 
 export enum ShowroomSceneStates {
     Overall,
@@ -33,33 +33,53 @@ export class ShowroomScene extends Scene {
 
         const defaultFocus = new TransformNode("defaultFocus", scene);
         defaultFocus.position.y = 1.5;
-        const camera = new ShowroomCamera(scene, watch.cameraParentOverall, params);
+
+        const camera = new ShowroomCamera(scene);
+        const overallState: IShowroomCameraMatchmoveState = {
+            matchmoveTarget: watch.cameraParentOverall,
+            focusDepth: watch.cameraParentOverall.position.length()
+        };
+        const claspState: IShowroomCameraMatchmoveState = {
+            matchmoveTarget: watch.cameraParentClasp,
+            focusDepth: watch.cameraParentClasp.position.length()
+        };
+        const faceState: IShowroomCameraMatchmoveState = {
+            matchmoveTarget: watch.cameraParentFace,
+            focusDepth: watch.cameraParentFace.position.length()
+        };
+        const levitateState: IShowroomCameraMatchmoveState = {
+            matchmoveTarget: watch.cameraParentLevitate,
+            focusDepth: watch.cameraParentLevitate.position.length()
+        };
+        const configureState: IShowroomCameraArcRotateState = {
+            startingPosition: watch.cameraParentOverall.absolutePosition.clone(),
+            target: (watch.cameraParentOverall.parent! as TransformNode).absolutePosition.clone()
+        };
+
+        camera.setToMatchmoveState(overallState);
 
         const testAsync = async function () {
             while (true) {
                 await Tools.DelayAsync(5000);
-                camera.setTrackingTransform(watch.cameraParentOverall);
-                await Tools.DelayAsync(5000);
-                camera.setTrackingTransform(watch.cameraParentClasp);
+                await camera.animateToMatchmoveState(claspState);
                 await Tools.DelayAsync(5000);
                 watch.setPoseDown();
-                camera.setTrackingTransform(watch.cameraParentFace);
+                await camera.animateToMatchmoveState(faceState);
                 await Tools.DelayAsync(5000);
-                camera.setTrackingTransform(watch.cameraParentLevitate);
+                await camera.animateToMatchmoveState(levitateState);
                 await Tools.DelayAsync(5000);
                 watch.setPoseUp();
-                camera.setTrackingTransform(watch.cameraParentOverall);
-                await Tools.DelayAsync(1200);
-                camera.activate();
+                await camera.animateToArcRotateState(configureState);
                 await Tools.DelayAsync(10000);
-                camera.deactivate();
-                camera.setTrackingTransform(watch.cameraParentLevitate);
+                camera.animateToMatchmoveState(levitateState);
                 watch.setPoseDown();
                 await Tools.DelayAsync(2000);
-                camera.setTrackingTransform(watch.cameraParentFace);
+                camera.animateToMatchmoveState(faceState);
                 await Tools.DelayAsync(2000);
                 watch.setPoseUp();
-                camera.setTrackingTransform(watch.cameraParentClasp);
+                camera.animateToMatchmoveState(claspState);
+                await Tools.DelayAsync(2000);
+                camera.animateToMatchmoveState(overallState);
             }
         };
         testAsync();
