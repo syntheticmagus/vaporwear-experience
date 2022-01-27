@@ -35,6 +35,10 @@ export class ShowroomScene extends Scene {
         defaultFocus.position.y = 1.5;
 
         const camera = new ShowroomCamera(scene);
+        camera.fov = 0.5;
+        camera.minZ = 0.01;
+        camera.maxZ = 100;
+        
         const overallState: IShowroomCameraMatchmoveState = {
             matchmoveTarget: watch.cameraParentOverall,
             focusDepth: watch.cameraParentOverall.position.length()
