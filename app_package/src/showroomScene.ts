@@ -1,4 +1,4 @@
-import { AbstractMesh, ArcRotateCamera, Color3, CubeTexture, Engine, FreeCamera, PBRMaterial, Scene, SceneLoader, Tools, TransformNode, Vector3 } from "@babylonjs/core";
+import { Color3, CubeTexture, Engine, Scene, Tools, TransformNode } from "@babylonjs/core";
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
 import { ShowroomCamera } from "./showroomCamera";
 import { Watch } from "./watch";
