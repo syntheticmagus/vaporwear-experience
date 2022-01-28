@@ -57,7 +57,9 @@ export class ShowroomScene extends Scene {
         };
         const configureState: IShowroomCameraArcRotateState = {
             startingPosition: watch.cameraParentOverall.absolutePosition.clone(),
-            target: (watch.cameraParentOverall.parent! as TransformNode).absolutePosition.clone()
+            target: (watch.cameraParentOverall.parent! as TransformNode).absolutePosition.clone(),
+            lowerRadiusLimit: 3,
+            upperRadiusLimit: 15
         };
 
         camera.setToMatchmoveState(overallState);
