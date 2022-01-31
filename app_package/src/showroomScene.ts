@@ -70,7 +70,7 @@ export class ShowroomScene extends Scene {
                 await Tools.DelayAsync(5000);
                 watch.setState(WatchState.Clasp);
                 await camera.animateToMatchmoveState(claspState);
-                await Tools.DelayAsync(5000);
+                await Tools.DelayAsync(25000);
                 watch.setState(WatchState.Face);
                 await camera.animateToMatchmoveState(faceState);
                 await Tools.DelayAsync(5000);

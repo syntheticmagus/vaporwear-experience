@@ -1,4 +1,4 @@
-import { AbstractMesh, AnimationGroup, ISceneLoaderAsyncResult, MeshBuilder, Quaternion, Scene, SceneLoader, TransformNode, Vector3 } from "@babylonjs/core";
+import { AbstractMesh, AnimationGroup, Camera, ISceneLoaderAsyncResult, Matrix, MeshBuilder, Observable, Quaternion, Scene, SceneLoader, TmpVectors, TransformNode, Vector2, Vector3 } from "@babylonjs/core";
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
 
 export enum WatchState {
@@ -22,6 +22,16 @@ class WatchStateHelpers {
     }
 }
 
+export class HotspotState {
+    constructor () {
+        this.position = new Vector2();
+        this.isVisible = false;
+    }
+
+    position: Vector2;
+    isVisible: boolean;
+}
+
 export class Watch extends TransformNode {
     private _animationWatchSpinUp: AnimationGroup;
     private _animationWatchSpinDown: AnimationGroup;
@@ -40,6 +50,9 @@ export class Watch extends TransformNode {
 
     private _viewbox0: AbstractMesh;
     private _viewbox1: AbstractMesh;
+
+    public hotspot0State: HotspotState;
+    public hotspot1State: HotspotState;
 
     private _state: WatchState;
 
@@ -107,6 +120,9 @@ export class Watch extends TransformNode {
         this._viewbox1 = scene.getMeshByName("viewbox_1")!;
         this._viewbox1.isVisible = false;
 
+        this.hotspot0State = new HotspotState();
+        this.hotspot1State = new HotspotState();
+
         this._state = WatchState.Overall;
     }
 
@@ -149,6 +165,7 @@ export class Watch extends TransformNode {
                 break;
             case WatchState.Clasp:
                 this._animationOrbitClasp.play(true);
+                this.getScene().onBeforeRenderObservable.runCoroutineAsync(this._updateHotspotVisibilityCoroutine());
                 break;
             case WatchState.Face:
                 this._animationOrbitFace.play(true);
@@ -160,5 +177,41 @@ export class Watch extends TransformNode {
 
         this._state = newState;
         return;
+    }
+
+    private *_updateHotspotVisibilityCoroutine() {
+        const scene = this.getScene();
+        const engine = scene.getEngine();
+        let renderWidth = -1;
+        let renderHeight = -1;
+        while (this._state === WatchState.Clasp) {
+            const camera = scene.activeCamera!;
+            const cameraWorldMat = camera.getWorldMatrix();
+            const cameraViewProjMat = camera.getTransformationMatrix();
+            const cameraPos = TmpVectors.Vector3[0];
+            renderWidth = engine.getRenderWidth();
+            renderHeight = engine.getRenderHeight();
+            cameraPos.copyFromFloats(cameraWorldMat.m[12], cameraWorldMat.m[13], cameraWorldMat.m[14]);
+
+            const vec = TmpVectors.Vector3[1];
+            const viewMat = TmpVectors.Matrix[0];
+
+            this._viewbox0.getWorldMatrix().invertToRef(viewMat);
+            Vector3.TransformCoordinatesToRef(cameraPos, viewMat, vec);
+            this.hotspot0State.isVisible = Math.abs(vec.x) < 1 && Math.abs(vec.y) < 1 && Math.abs(vec.z) < 1;
+            Vector3.ProjectToRef(this._hotspot0.absolutePosition, Matrix.IdentityReadOnly, cameraViewProjMat, camera.viewport, vec);
+            this.hotspot0State.position.copyFromFloats(vec.x * renderWidth, vec.y * renderHeight);
+            
+            this._viewbox1.getWorldMatrix().invertToRef(viewMat);
+            Vector3.TransformCoordinatesToRef(cameraPos, viewMat, vec);
+            this.hotspot1State.isVisible = Math.abs(vec.x) < 1 && Math.abs(vec.y) < 1 && Math.abs(vec.z) < 1;
+            Vector3.ProjectToRef(this._hotspot1.absolutePosition, Matrix.IdentityReadOnly, cameraViewProjMat, camera.viewport, vec);
+            this.hotspot0State.position.copyFromFloats(vec.x * renderWidth, vec.y * renderHeight);
+
+            yield;
+        }
+
+        this.hotspot0State.isVisible = false;
+        this.hotspot1State.isVisible = false;
     }
 }
