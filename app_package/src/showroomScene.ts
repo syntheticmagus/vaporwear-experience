@@ -1,10 +1,10 @@
-import { Color3, CubeTexture, Engine, Scene, Tools, TransformNode } from "@babylonjs/core";
+import { Color3, CubeTexture, Engine, Scene, TransformNode } from "@babylonjs/core";
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
 import { Watch, WatchState } from "./watch";
 import { IShowroomCameraArcRotateState, IShowroomCameraMatchmoveState, ShowroomCamera } from "@syntheticmagus/showroom-scene";
 import { AdvancedDynamicTexture, Rectangle } from "@babylonjs/gui";
 
-export enum ShowroomSceneState {
+export enum ShowroomState {
     Overall,
     Clasp,
     Face,
@@ -12,80 +12,92 @@ export enum ShowroomSceneState {
     Configure
 }
 
-export class ShowroomScene extends Scene {
-    private _state: ShowroomSceneState;
+export class Showroom {
+    private _scene: Scene;
+    private _state: ShowroomState;
+
+    private _watch: Watch;
+
+    private _camera: ShowroomCamera;
+
+    private _overallState: IShowroomCameraMatchmoveState;
+    private _claspState: IShowroomCameraMatchmoveState;
+    private _faceState: IShowroomCameraMatchmoveState;
+    private _levitateState: IShowroomCameraMatchmoveState;
+    private _configureState: IShowroomCameraArcRotateState;
     
-    public get State(): ShowroomSceneState {
+    public get State(): ShowroomState {
         return this._state;
     }
 
-    public set State(state: ShowroomSceneState) {
-        switch (state) {
-            case ShowroomSceneState.Overall:
-                break;
-            case ShowroomSceneState.Clasp:
-                break;
-            case ShowroomSceneState.Face:
-                break;
-            case ShowroomSceneState.Levitate:
-                break;
-            case ShowroomSceneState.Configure:
-                break;
+    public set State(state: ShowroomState) {
+        if (this._state === state) {
+            return;
         }
 
         this._state = state;
+        switch (this._state) {
+            case ShowroomState.Overall:
+                this._watch.setState(WatchState.Overall);
+                this._camera.animateToMatchmoveState(this._overallState);
+                console.log("Hello?");
+                break;
+            case ShowroomState.Clasp:
+                this._watch.setState(WatchState.Clasp);
+                this._camera.animateToMatchmoveState(this._claspState);
+                break;
+            case ShowroomState.Face:
+                this._watch.setState(WatchState.Face);
+                this._camera.animateToMatchmoveState(this._faceState);
+                break;
+            case ShowroomState.Levitate:
+                this._watch.setState(WatchState.Levitate);
+                this._camera.animateToMatchmoveState(this._levitateState);
+                break;
+            case ShowroomState.Configure:
+                this._watch.setState(WatchState.Configure);
+                this._camera.animateToArcRotateState(this._configureState);
+                break;
+        }
     }
 
-    private constructor(engine: Engine) {
-        super(engine);
+    private constructor(scene: Scene, watch: Watch) {
+        this._scene = scene;
+        this._state = ShowroomState.Overall;
 
-        this._state = ShowroomSceneState.Overall;
-    }
+        this._watch = watch;
 
-    public static async CreateAsync(engine: Engine, params: IVaporwearExperienceParams): Promise<ShowroomScene> {
-        const scene = new ShowroomScene(engine);
-        scene.clearColor = Color3.White().toColor4();
-        scene.skipFrustumClipping = true;
-
-        const environmentTexture = CubeTexture.CreateFromPrefilteredData(params.assetUrlRoot + params.assetUrlEnvironmentTexture, scene);
-        const fireTexture = CubeTexture.CreateFromPrefilteredData(params.assetUrlRoot + params.assetUrlDiamondFireTexture, scene);
-        scene.environmentTexture = environmentTexture;
-
-        const watch = await Watch.createAsync(scene, params);
-
-        const defaultFocus = new TransformNode("defaultFocus", scene);
-        defaultFocus.position.y = 1.5;
-
-        const camera = new ShowroomCamera(scene);
-        camera.fov = 0.5;
-        camera.minZ = 0.01;
-        camera.maxZ = 100;
+        this._camera = new ShowroomCamera(this._scene);
+        this._camera.fov = 0.5;
+        this._camera.minZ = 0.01;
+        this._camera.maxZ = 100;
         
-        const overallState: IShowroomCameraMatchmoveState = {
-            matchmoveTarget: watch.cameraParentOverall,
-            focusDepth: watch.cameraParentOverall.position.length()
+        this._overallState = {
+            matchmoveTarget: this._watch.cameraParentOverall,
+            focusDepth: this._watch.cameraParentOverall.position.length()
         };
-        const claspState: IShowroomCameraMatchmoveState = {
-            matchmoveTarget: watch.cameraParentClasp,
-            focusDepth: watch.cameraParentClasp.position.length()
+        this._claspState = {
+            matchmoveTarget: this._watch.cameraParentClasp,
+            focusDepth: this._watch.cameraParentClasp.position.length()
         };
-        const faceState: IShowroomCameraMatchmoveState = {
-            matchmoveTarget: watch.cameraParentFace,
-            focusDepth: watch.cameraParentFace.position.length()
+        this._faceState = {
+            matchmoveTarget: this._watch.cameraParentFace,
+            focusDepth: this._watch.cameraParentFace.position.length()
         };
-        const levitateState: IShowroomCameraMatchmoveState = {
-            matchmoveTarget: watch.cameraParentLevitate,
-            focusDepth: watch.cameraParentLevitate.position.length()
+        this._levitateState = {
+            matchmoveTarget: this._watch.cameraParentLevitate,
+            focusDepth: this._watch.cameraParentLevitate.position.length()
         };
-        const configureState: IShowroomCameraArcRotateState = {
-            startingPosition: watch.cameraParentOverall.absolutePosition.clone(),
-            target: (watch.cameraParentOverall.parent! as TransformNode).absolutePosition.clone(),
+        this._configureState = {
+            startingPosition: this._watch.cameraParentOverall.absolutePosition.clone(),
+            target: (this._watch.cameraParentOverall.parent! as TransformNode).absolutePosition.clone(),
             lowerRadiusLimit: 3,
             upperRadiusLimit: 15
         };
 
-        watch.setState(WatchState.Overall);
-        camera.setToMatchmoveState(overallState);
+        this._watch.setState(WatchState.Overall);
+        this._camera.setToMatchmoveState(this._overallState);
+        this._state = ShowroomState.Overall;
 
         const guiTexture = AdvancedDynamicTexture.CreateFullscreenUI("gui", true, scene);
         const rect = new Rectangle("rect");
@@ -103,37 +115,23 @@ export class ShowroomScene extends Scene {
                 yield;
             }
         }());
+    }
 
-        const testAsync = async function () {
-            while (true) {
-                await Tools.DelayAsync(5000);
-                watch.setState(WatchState.Clasp);
-                await camera.animateToMatchmoveState(claspState);
-                await Tools.DelayAsync(25000);
-                watch.setState(WatchState.Face);
-                await camera.animateToMatchmoveState(faceState);
-                await Tools.DelayAsync(5000);
-                watch.setState(WatchState.Levitate);
-                await camera.animateToMatchmoveState(levitateState);
-                await Tools.DelayAsync(5000);
-                watch.setState(WatchState.Configure);
-                await camera.animateToArcRotateState(configureState);
-                await Tools.DelayAsync(10000);
-                watch.setState(WatchState.Levitate);
-                camera.animateToMatchmoveState(levitateState);
-                await Tools.DelayAsync(200);
-                watch.setState(WatchState.Face);
-                camera.animateToMatchmoveState(faceState);
-                await Tools.DelayAsync(200);
-                watch.setState(WatchState.Clasp);
-                camera.animateToMatchmoveState(claspState);
-                await Tools.DelayAsync(200);
-                watch.setState(WatchState.Overall);
-                camera.animateToMatchmoveState(overallState);
-            }
-        };
-        testAsync();
+    public static async CreateAsync(engine: Engine, params: IVaporwearExperienceParams): Promise<Showroom> {
+        const scene = new Scene(engine);
+        scene.clearColor = Color3.White().toColor4();
+        scene.skipFrustumClipping = true;
 
-        return scene;
+        const environmentTexture = CubeTexture.CreateFromPrefilteredData(params.assetUrlRoot + params.assetUrlEnvironmentTexture, scene);
+        const fireTexture = CubeTexture.CreateFromPrefilteredData(params.assetUrlRoot + params.assetUrlDiamondFireTexture, scene);
+        scene.environmentTexture = environmentTexture;
+
+        const watch = await Watch.createAsync(scene, params);
+
+        return new Showroom(scene, watch);
+    }
+
+    public render(): void {
+        this._scene.render();
     }
 }
