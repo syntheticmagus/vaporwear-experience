@@ -1,6 +1,6 @@
 import { Color3, CubeTexture, Engine, Scene, Tools, TransformNode } from "@babylonjs/core";
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
-import { Watch } from "./watch";
+import { Watch, WatchState } from "./watch";
 import { IShowroomCameraArcRotateState, IShowroomCameraMatchmoveState, ShowroomCamera } from "@syntheticmagus/showroom-scene";
 
 export enum ShowroomSceneStates {
@@ -62,29 +62,34 @@ export class ShowroomScene extends Scene {
             upperRadiusLimit: 15
         };
 
+        watch.setState(WatchState.Overall);
         camera.setToMatchmoveState(overallState);
 
         const testAsync = async function () {
             while (true) {
                 await Tools.DelayAsync(5000);
+                watch.setState(WatchState.Clasp);
                 await camera.animateToMatchmoveState(claspState);
                 await Tools.DelayAsync(5000);
-                watch.setPoseDown();
+                watch.setState(WatchState.Face);
                 await camera.animateToMatchmoveState(faceState);
                 await Tools.DelayAsync(5000);
+                watch.setState(WatchState.Levitate);
                 await camera.animateToMatchmoveState(levitateState);
                 await Tools.DelayAsync(5000);
-                watch.setPoseUp();
+                watch.setState(WatchState.Configure);
                 await camera.animateToArcRotateState(configureState);
                 await Tools.DelayAsync(10000);
+                watch.setState(WatchState.Levitate);
                 camera.animateToMatchmoveState(levitateState);
-                watch.setPoseDown();
-                await Tools.DelayAsync(2000);
+                await Tools.DelayAsync(200);
+                watch.setState(WatchState.Face);
                 camera.animateToMatchmoveState(faceState);
-                await Tools.DelayAsync(2000);
-                watch.setPoseUp();
+                await Tools.DelayAsync(200);
+                watch.setState(WatchState.Clasp);
                 camera.animateToMatchmoveState(claspState);
-                await Tools.DelayAsync(2000);
+                await Tools.DelayAsync(200);
+                watch.setState(WatchState.Overall);
                 camera.animateToMatchmoveState(overallState);
             }
         };

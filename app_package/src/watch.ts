@@ -1,23 +1,47 @@
-import { AnimationGroup, ISceneLoaderAsyncResult, MeshBuilder, Quaternion, Scene, SceneLoader, TransformNode, Vector3 } from "@babylonjs/core";
+import { AbstractMesh, AnimationGroup, ISceneLoaderAsyncResult, MeshBuilder, Quaternion, Scene, SceneLoader, TransformNode, Vector3 } from "@babylonjs/core";
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
 
-enum WatchAnimationState {
-    Up,
-    Down,
-    Animating
+export enum WatchState {
+    Overall,
+    Clasp,
+    Face,
+    Levitate,
+    Configure
+}
+
+class WatchStateHelpers {
+    public static IsUpState(state: WatchState): boolean {
+        switch (state) {
+            case WatchState.Overall:
+            case WatchState.Clasp:
+            case WatchState.Configure:
+                return true;
+            default:
+                return false;
+        }
+    }
 }
 
 export class Watch extends TransformNode {
-    private _animationSpinDown: AnimationGroup;
-    private _animationSpinUp: AnimationGroup;
-
-    private _animationState: WatchAnimationState;
-    private _animationTargetState: WatchAnimationState;
+    private _animationWatchSpinUp: AnimationGroup;
+    private _animationWatchSpinDown: AnimationGroup;
+    private _animationOrbitOverall: AnimationGroup;
+    private _animationOrbitClasp: AnimationGroup;
+    private _animationOrbitFace: AnimationGroup;
+    private _animationOrbitLevitate: AnimationGroup;
 
     private _cameraParentOverall: TransformNode;
     private _cameraParentClasp: TransformNode;
     private _cameraParentFace: TransformNode;
     private _cameraParentLevitate: TransformNode;
+
+    private _hotspot0: TransformNode;
+    private _hotspot1: TransformNode;
+
+    private _viewbox0: AbstractMesh;
+    private _viewbox1: AbstractMesh;
+
+    private _state: WatchState;
 
     public get cameraParentOverall(): TransformNode {
         return this._cameraParentOverall;
@@ -40,16 +64,24 @@ export class Watch extends TransformNode {
 
         importMeshResult.meshes[0].parent = this;
         
-        this._animationState = WatchAnimationState.Up;
-        this._animationTargetState = WatchAnimationState.Up;
+        const animations: Map<string, AnimationGroup> = new Map();
+        importMeshResult.animationGroups.forEach((animationGroup) => {
+            animations.set(animationGroup.name, animationGroup);
+        });
+        this._animationWatchSpinUp = animations.get("watch_spin-up")!;
+        this._animationWatchSpinDown = animations.get("watch_spin-down")!;
+        this._animationOrbitOverall = animations.get("orbit_overall")!;
+        this._animationOrbitClasp = animations.get("orbit_clasp")!;
+        this._animationOrbitFace = animations.get("orbit_face")!;
+        this._animationOrbitLevitate = animations.get("orbit_levitate")!;
         
-        this._animationSpinDown = importMeshResult.animationGroups[0];
-        this._animationSpinDown.stop();
-        this._animationSpinDown.loopAnimation = false;
-        
-        this._animationSpinUp = importMeshResult.animationGroups[1];
-        this._animationSpinUp.stop();
-        this._animationSpinUp.loopAnimation = false;
+        this._animationWatchSpinDown.stop();
+        this._animationWatchSpinUp.stop();
+
+        this._animationOrbitOverall.play(true);
+        this._animationOrbitClasp.stop();
+        this._animationOrbitFace.stop();
+        this._animationOrbitLevitate.stop();
 
         // Note: this convenience approach takes a hard dependency on there only being one watch in the scene.
         this._cameraParentOverall = scene.getTransformNodeByName("camera_overall")!;
@@ -66,14 +98,16 @@ export class Watch extends TransformNode {
             parent.scaling.z *= -1;
             parent.rotate(Vector3.RightReadOnly, -Math.PI / 2);
         });
-        scene.onBeforeRenderObservable.runCoroutineAsync(function* () {
-            while (true) {
-                cameraParents.forEach((parent) => {
-                    (parent.parent! as TransformNode).rotate(Vector3.UpReadOnly, -0.01);
-                });
-                yield;
-            }
-        }());
+
+        this._hotspot0 = scene.getTransformNodeByName("hotspot_0")!;
+        this._hotspot1 = scene.getTransformNodeByName("hotspot_1")!;
+
+        this._viewbox0 = scene.getMeshByName("viewbox_0")!;
+        this._viewbox0.isVisible = false;
+        this._viewbox1 = scene.getMeshByName("viewbox_1")!;
+        this._viewbox1.isVisible = false;
+
+        this._state = WatchState.Overall;
     }
 
     public static async createAsync(scene: Scene, params: IVaporwearExperienceParams): Promise<Watch> {
@@ -81,35 +115,50 @@ export class Watch extends TransformNode {
         return new Watch(scene, importMeshResult);
     }
 
-    private _animateIfNeeded(): void {
-        if (this._animationState === WatchAnimationState.Animating || this._animationState === this._animationTargetState) {
-            // Animation will continue until we're in the right state, so if we're 
-            // already animating then getting to the right state will be handled.
-            // Also, if we're already in the right state, obviously nothing needs 
-            // to be done.
+    public setState(newState: WatchState): void {
+        if (newState === this._state) {
             return;
         }
 
-        const animation = this._animationTargetState === WatchAnimationState.Up ? this._animationSpinUp : this._animationSpinDown;
-        const target = this._animationTargetState;
-        animation.onAnimationGroupEndObservable.addOnce(() => {
-            // Note: this takes a hard dependency on the single-threaded nature of 
-            // JavaScript making this callback uninterruptable. If it weren't for
-            // that, it would be dangerous to switch this._animationState out of
-            // WatchAnimationState.Animating.
-            this._animationState = target;
-            this._animateIfNeeded();
-        });
-        animation.play();
-    }
+        if (WatchStateHelpers.IsUpState(this._state) && !WatchStateHelpers.IsUpState(newState)) {
+            this._animationWatchSpinUp.stop();
+            this._animationWatchSpinDown.play(false);
+        } else if (!WatchStateHelpers.IsUpState(this._state) && WatchStateHelpers.IsUpState(newState)) {
+            this._animationWatchSpinDown.stop();
+            this._animationWatchSpinUp.play(false);
+        }
 
-    public setPoseDown(): void {
-        this._animationTargetState = WatchAnimationState.Down;
-        this._animateIfNeeded();
-    }
+        switch (this._state) {
+            case WatchState.Overall:
+                this._animationOrbitOverall.stop();
+                break;
+            case WatchState.Clasp:
+                this._animationOrbitClasp.stop();
+                break;
+            case WatchState.Face:
+                this._animationOrbitFace.stop();
+                break;
+            case WatchState.Levitate:
+                this._animationOrbitLevitate.stop();
+                break;
+        }
 
-    public setPoseUp(): void {
-        this._animationTargetState = WatchAnimationState.Up;
-        this._animateIfNeeded();
+        switch (newState) {
+            case WatchState.Overall:
+                this._animationOrbitOverall.play(true);
+                break;
+            case WatchState.Clasp:
+                this._animationOrbitClasp.play(true);
+                break;
+            case WatchState.Face:
+                this._animationOrbitFace.play(true);
+                break;
+            case WatchState.Levitate:
+                this._animationOrbitLevitate.play(true);
+                break;
+        }
+
+        this._state = newState;
+        return;
     }
 }
