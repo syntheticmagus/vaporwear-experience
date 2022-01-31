@@ -1,4 +1,4 @@
-import { AbstractMesh, AnimationGroup, Camera, ISceneLoaderAsyncResult, Matrix, MeshBuilder, Observable, Quaternion, Scene, SceneLoader, TmpVectors, TransformNode, Vector2, Vector3 } from "@babylonjs/core";
+import { AbstractMesh, AnimationGroup, ISceneLoaderAsyncResult, Matrix, Scene, SceneLoader, TmpVectors, TransformNode, Vector2, Vector3 } from "@babylonjs/core";
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
 
 export enum WatchState {
@@ -206,7 +206,7 @@ export class Watch extends TransformNode {
             Vector3.TransformCoordinatesToRef(cameraPos, viewMat, vec);
             this.hotspot1State.isVisible = Math.abs(vec.x) < 1 && Math.abs(vec.y) < 1 && Math.abs(vec.z) < 1;
             Vector3.ProjectToRef(this._hotspot1.absolutePosition, Matrix.IdentityReadOnly, cameraViewProjMat, camera.viewport, vec);
-            this.hotspot0State.position.copyFromFloats(vec.x * renderWidth, vec.y * renderHeight);
+            this.hotspot1State.position.copyFromFloats(vec.x * renderWidth, vec.y * renderHeight);
 
             yield;
         }

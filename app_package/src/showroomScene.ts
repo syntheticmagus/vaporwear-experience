@@ -2,8 +2,9 @@ import { Color3, CubeTexture, Engine, Scene, Tools, TransformNode } from "@babyl
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
 import { Watch, WatchState } from "./watch";
 import { IShowroomCameraArcRotateState, IShowroomCameraMatchmoveState, ShowroomCamera } from "@syntheticmagus/showroom-scene";
+import { AdvancedDynamicTexture, Rectangle } from "@babylonjs/gui";
 
-export enum ShowroomSceneStates {
+export enum ShowroomSceneState {
     Overall,
     Clasp,
     Face,
@@ -12,12 +13,33 @@ export enum ShowroomSceneStates {
 }
 
 export class ShowroomScene extends Scene {
-    private _state: ShowroomSceneStates;
+    private _state: ShowroomSceneState;
+    
+    public get State(): ShowroomSceneState {
+        return this._state;
+    }
+
+    public set State(state: ShowroomSceneState) {
+        switch (state) {
+            case ShowroomSceneState.Overall:
+                break;
+            case ShowroomSceneState.Clasp:
+                break;
+            case ShowroomSceneState.Face:
+                break;
+            case ShowroomSceneState.Levitate:
+                break;
+            case ShowroomSceneState.Configure:
+                break;
+        }
+
+        this._state = state;
+    }
 
     private constructor(engine: Engine) {
         super(engine);
 
-        this._state = ShowroomSceneStates.Overall;
+        this._state = ShowroomSceneState.Overall;
     }
 
     public static async CreateAsync(engine: Engine, params: IVaporwearExperienceParams): Promise<ShowroomScene> {
@@ -64,6 +86,23 @@ export class ShowroomScene extends Scene {
 
         watch.setState(WatchState.Overall);
         camera.setToMatchmoveState(overallState);
+
+        const guiTexture = AdvancedDynamicTexture.CreateFullscreenUI("gui", true, scene);
+        const rect = new Rectangle("rect");
+        rect.verticalAlignment = Rectangle.VERTICAL_ALIGNMENT_TOP;
+        rect.horizontalAlignment = Rectangle.HORIZONTAL_ALIGNMENT_LEFT
+        rect.widthInPixels = 10;
+        rect.heightInPixels = 10;
+        rect.color = "red";
+        guiTexture.addControl(rect);
+        scene.onBeforeRenderObservable.runCoroutineAsync(function* () {
+            while (true) {
+                rect.leftInPixels = watch.hotspot1State.position.x;
+                rect.topInPixels = watch.hotspot1State.position.y;
+                rect.isVisible = watch.hotspot1State.isVisible;
+                yield;
+            }
+        }());
 
         const testAsync = async function () {
             while (true) {
