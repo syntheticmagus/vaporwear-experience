@@ -17,21 +17,25 @@ export function initializeVaporwearExperience(params: IVaporwearExperienceParams
         const testAsync = async () => {
             while (true) {
                 await Tools.DelayAsync(5000);
-                showroom.State = ShowroomState.Clasp;
-                await Tools.DelayAsync(25000);
-                showroom.State = ShowroomState.Face;
+                showroom.state = ShowroomState.Clasp;
                 await Tools.DelayAsync(5000);
-                showroom.State = ShowroomState.Levitate;
+                showroom.state = ShowroomState.Face;
                 await Tools.DelayAsync(5000);
-                showroom.State = ShowroomState.Configure;
+                showroom.state = ShowroomState.Levitate;
+                await Tools.DelayAsync(5000);
+                showroom.state = ShowroomState.Configure;
                 await Tools.DelayAsync(10000);
-                showroom.State = ShowroomState.Levitate;
+                showroom.state = ShowroomState.Levitate;
                 await Tools.DelayAsync(2000);
-                showroom.State = ShowroomState.Face;
+                showroom.state = ShowroomState.Face;
                 await Tools.DelayAsync(2000);
-                showroom.State = ShowroomState.Clasp;
+                showroom.state = ShowroomState.Clasp;
                 await Tools.DelayAsync(2000);
-                showroom.State = ShowroomState.Overall;
+                showroom.state = ShowroomState.Overall;
+                await Tools.DelayAsync(2000);
+                showroom.showStuds = true;
+                showroom.setMeshMaterialByName("chassis", "band_3");
+                showroom.setMeshMaterialByName("setting", "setting_silver");
             }
         };
         testAsync();

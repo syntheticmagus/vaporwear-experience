@@ -3,6 +3,7 @@ export interface IVaporwearExperienceParams {
     assetUrlRoot: string;
     assetUrlWatch: string;
     assetUrlWatchStuds: string;
+    assetUrlWatchMaterials: string;
     assetUrlEnvironmentTexture: string;
     assetUrlDiamondFireTexture: string;
 }

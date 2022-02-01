@@ -31,6 +31,7 @@ initializeVaporwearExperience({
     assetUrlRoot: assetsHostUrl,
     assetUrlWatch: "watch.glb",
     assetUrlWatchStuds: "watch_studs.glb",
+    assetUrlWatchMaterials: "watch_materials.glb",
     assetUrlEnvironmentTexture: "outdoor.env",
     assetUrlDiamondFireTexture: "diamond_fire.env",
 });

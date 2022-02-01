@@ -1,4 +1,4 @@
-import { Color3, CubeTexture, Engine, Scene, TransformNode } from "@babylonjs/core";
+import { Color3, CubeTexture, Engine, Observable, PBRMaterial, Scene, SceneLoader, TransformNode } from "@babylonjs/core";
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
 import { Watch, WatchState } from "./watch";
 import { IShowroomCameraArcRotateState, IShowroomCameraMatchmoveState, ShowroomCamera } from "@syntheticmagus/showroom-scene";
@@ -28,11 +28,11 @@ export class Showroom {
     private _levitateState: IShowroomCameraMatchmoveState;
     private _configureState: IShowroomCameraArcRotateState;
     
-    public get State(): ShowroomState {
+    public get state(): ShowroomState {
         return this._state;
     }
 
-    public set State(state: ShowroomState) {
+    public set state(state: ShowroomState) {
         if (this._state === state) {
             return;
         }
@@ -62,7 +62,17 @@ export class Showroom {
         }
     }
 
-    private constructor(scene: Scene, watch: Watch, studsPromise: Promise<WatchStuds>) {
+    public set showStuds(visibility: boolean) {
+        this._studs?.Mesh?.setEnabled(visibility);
+    }
+
+    private _configurationOptionsLoaded: boolean;
+    public get configurationOptionsLoaded(): boolean {
+        return this._configurationOptionsLoaded;
+    }
+    public configurationOptionsLoadedObservable: Observable<Showroom>;
+
+    private constructor(scene: Scene, watch: Watch, studsPromise: Promise<WatchStuds>, materialsPromise: Promise<void>) {
         this._scene = scene;
         this._state = ShowroomState.Overall;
 
@@ -100,28 +110,18 @@ export class Showroom {
         this._camera.setToMatchmoveState(this._overallState);
         this._state = ShowroomState.Overall;
 
-        const guiTexture = AdvancedDynamicTexture.CreateFullscreenUI("gui", true, scene);
-        const rect = new Rectangle("rect");
-        rect.verticalAlignment = Rectangle.VERTICAL_ALIGNMENT_TOP;
-        rect.horizontalAlignment = Rectangle.HORIZONTAL_ALIGNMENT_LEFT
-        rect.widthInPixels = 10;
-        rect.heightInPixels = 10;
-        rect.color = "red";
-        guiTexture.addControl(rect);
-        scene.onBeforeRenderObservable.runCoroutineAsync(function* () {
-            while (true) {
-                rect.leftInPixels = watch.hotspot1State.position.x;
-                rect.topInPixels = watch.hotspot1State.position.y;
-                rect.isVisible = watch.hotspot1State.isVisible;
-                yield;
-            }
-        }());
-
         studsPromise.then((studs) => {
             studs.Mesh.setEnabled(false);
             this._studs = studs;
             watch.attachToBodyBone(studs.Mesh);
         });
+
+        this._configurationOptionsLoaded = false;
+        this.configurationOptionsLoadedObservable = new Observable<Showroom>();
+        Promise.all([studsPromise, materialsPromise]).then(() => {
+            this._configurationOptionsLoaded = true;
+            this.configurationOptionsLoadedObservable.notifyObservers(this);
+        })
     }
 
     public static async CreateAsync(engine: Engine, params: IVaporwearExperienceParams): Promise<Showroom> {
@@ -134,12 +134,25 @@ export class Showroom {
 
         const watch = await Watch.createAsync(scene, params);
         const studsPromise = WatchStuds.CreateAsync(scene, params);
-        // TODO: Import materials.
+        
+        const materialsPromise = SceneLoader.ImportMeshAsync("", params.assetUrlRoot, params.assetUrlWatchMaterials, scene).then((result) => {
+            result.meshes[0].setEnabled(false);
+        });
 
-        return new Showroom(scene, watch, studsPromise);
+        return new Showroom(scene, watch, studsPromise, materialsPromise);
     }
 
     public render(): void {
         this._scene.render();
+    }
+
+    public setMeshMaterialByName(meshName: string, materialName: string): boolean {
+        const mesh = this._scene.getMeshByName(meshName);
+        const material = this._scene.getMaterialByName(materialName);
+        if (mesh && material) {
+            mesh.material = material;
+            return true;
+        }
+        return false;
     }
 }
