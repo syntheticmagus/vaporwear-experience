@@ -158,6 +158,8 @@ export class Showroom {
 
     public createDebugtUI(): void {
         const guiTexture = AdvancedDynamicTexture.CreateFullscreenUI("guiTexture", true, this._scene);
+        guiTexture.idealHeight = 700;
+        guiTexture.idealWidth = guiTexture.idealHeight * 16 / 9;
 
         const hotspot0 = new Rectangle("hotspot0");
         hotspot0.verticalAlignment = Rectangle.VERTICAL_ALIGNMENT_TOP;
@@ -186,7 +188,7 @@ export class Showroom {
             hotspot1.topInPixels = this._watch.hotspot1State.position.y;
         });
 
-        const stateGroup = new RadioGroup("Showroom State");
+        const stateGroup = new RadioGroup("State");
         stateGroup.addRadio("Overall", () => { this.state = ShowroomState.Overall; }, true);
         stateGroup.addRadio("Clasp", () => { this.state = ShowroomState.Clasp; }, false);
         stateGroup.addRadio("Face", () => { this.state = ShowroomState.Face; }, false);
@@ -203,7 +205,7 @@ export class Showroom {
         bandsGroup.addRadio("band_3", () => { this.setMeshMaterialByName("chassis", "band_3"); }, false);
         bandsGroup.addRadio("band_4", () => { this.setMeshMaterialByName("chassis", "band_4"); }, false);
         
-        const hotspotsGroup = new CheckboxGroup("Show Hotspots");
+        const hotspotsGroup = new CheckboxGroup("Hotspots");
         hotspotsGroup.addCheckbox("Clasp", (checked) => { showHotspots = checked; }, false);
 
         const leftSelectionPanel = new SelectionPanel("leftSelectionPanel", [stateGroup, additionsGroup, bandsGroup, hotspotsGroup]);
