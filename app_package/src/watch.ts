@@ -1,4 +1,4 @@
-import { AbstractMesh, AnimationGroup, ISceneLoaderAsyncResult, Matrix, Scene, SceneLoader, TmpVectors, TransformNode, Vector2, Vector3 } from "@babylonjs/core";
+import { AbstractMesh, AnimationGroup, Bone, ISceneLoaderAsyncResult, Matrix, Scene, SceneLoader, TmpVectors, TransformNode, Vector2, Vector3 } from "@babylonjs/core";
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
 
 export enum WatchState {
@@ -40,6 +40,9 @@ export class Watch extends TransformNode {
     private _animationOrbitFace: AnimationGroup;
     private _animationOrbitLevitate: AnimationGroup;
 
+    private _bodyBone: Bone;
+    private _rootMesh: AbstractMesh;
+
     private _cameraParentOverall: TransformNode;
     private _cameraParentClasp: TransformNode;
     private _cameraParentFace: TransformNode;
@@ -72,13 +75,13 @@ export class Watch extends TransformNode {
         return this._cameraParentLevitate;
     }
 
-    private constructor (scene: Scene, importMeshResult: ISceneLoaderAsyncResult) {
+    private constructor (scene: Scene, importWatchResult: ISceneLoaderAsyncResult) {
         super("watchRoot", scene);
 
-        importMeshResult.meshes[0].parent = this;
+        importWatchResult.meshes[0].parent = this;
         
         const animations: Map<string, AnimationGroup> = new Map();
-        importMeshResult.animationGroups.forEach((animationGroup) => {
+        importWatchResult.animationGroups.forEach((animationGroup) => {
             animations.set(animationGroup.name, animationGroup);
         });
         this._animationWatchSpinUp = animations.get("watch_spin-up")!;
@@ -95,6 +98,9 @@ export class Watch extends TransformNode {
         this._animationOrbitClasp.stop();
         this._animationOrbitFace.stop();
         this._animationOrbitLevitate.stop();
+
+        this._bodyBone = importWatchResult.skeletons[0].bones[2];
+        this._rootMesh = importWatchResult.meshes[0];
 
         // Note: this convenience approach takes a hard dependency on there only being one watch in the scene.
         this._cameraParentOverall = scene.getTransformNodeByName("camera_overall")!;
@@ -127,8 +133,8 @@ export class Watch extends TransformNode {
     }
 
     public static async createAsync(scene: Scene, params: IVaporwearExperienceParams): Promise<Watch> {
-        const importMeshResult = await SceneLoader.ImportMeshAsync("", params.assetUrlRoot, params.assetUrlWatch, scene);
-        return new Watch(scene, importMeshResult);
+        const importWatchResult = await SceneLoader.ImportMeshAsync("", params.assetUrlRoot, params.assetUrlWatch, scene);
+        return new Watch(scene, importWatchResult);
     }
 
     public setState(newState: WatchState): void {
@@ -213,5 +219,9 @@ export class Watch extends TransformNode {
 
         this.hotspot0State.isVisible = false;
         this.hotspot1State.isVisible = false;
+    }
+
+    public attachToBodyBone(mesh: AbstractMesh): void {
+        mesh.attachToBone(this._bodyBone, this._rootMesh);
     }
 }

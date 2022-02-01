@@ -3,6 +3,7 @@ import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
 import { Watch, WatchState } from "./watch";
 import { IShowroomCameraArcRotateState, IShowroomCameraMatchmoveState, ShowroomCamera } from "@syntheticmagus/showroom-scene";
 import { AdvancedDynamicTexture, Rectangle } from "@babylonjs/gui";
+import { WatchStuds } from "./watchStuds";
 
 export enum ShowroomState {
     Overall,
@@ -17,6 +18,7 @@ export class Showroom {
     private _state: ShowroomState;
 
     private _watch: Watch;
+    private _studs?: WatchStuds;
 
     private _camera: ShowroomCamera;
 
@@ -40,7 +42,6 @@ export class Showroom {
             case ShowroomState.Overall:
                 this._watch.setState(WatchState.Overall);
                 this._camera.animateToMatchmoveState(this._overallState);
-                console.log("Hello?");
                 break;
             case ShowroomState.Clasp:
                 this._watch.setState(WatchState.Clasp);
@@ -61,7 +62,7 @@ export class Showroom {
         }
     }
 
-    private constructor(scene: Scene, watch: Watch) {
+    private constructor(scene: Scene, watch: Watch, studsPromise: Promise<WatchStuds>) {
         this._scene = scene;
         this._state = ShowroomState.Overall;
 
@@ -115,6 +116,12 @@ export class Showroom {
                 yield;
             }
         }());
+
+        studsPromise.then((studs) => {
+            studs.Mesh.setEnabled(false);
+            this._studs = studs;
+            watch.attachToBodyBone(studs.Mesh);
+        });
     }
 
     public static async CreateAsync(engine: Engine, params: IVaporwearExperienceParams): Promise<Showroom> {
@@ -123,12 +130,13 @@ export class Showroom {
         scene.skipFrustumClipping = true;
 
         const environmentTexture = CubeTexture.CreateFromPrefilteredData(params.assetUrlRoot + params.assetUrlEnvironmentTexture, scene);
-        const fireTexture = CubeTexture.CreateFromPrefilteredData(params.assetUrlRoot + params.assetUrlDiamondFireTexture, scene);
         scene.environmentTexture = environmentTexture;
 
         const watch = await Watch.createAsync(scene, params);
+        const studsPromise = WatchStuds.CreateAsync(scene, params);
+        // TODO: Import materials.
 
-        return new Showroom(scene, watch);
+        return new Showroom(scene, watch, studsPromise);
     }
 
     public render(): void {
