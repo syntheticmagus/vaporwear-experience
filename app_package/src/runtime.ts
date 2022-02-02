@@ -3,7 +3,7 @@ import "@babylonjs/gui";
 import "@babylonjs/inspector";
 
 import { Engine } from "@babylonjs/core";
-import { Showroom } from "./showroomScene";
+import { Showroom } from "./showroom";
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
 
 export function initializeVaporwearExperience(params: IVaporwearExperienceParams) {

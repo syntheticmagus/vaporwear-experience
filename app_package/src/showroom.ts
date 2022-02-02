@@ -1,9 +1,10 @@
-import { Color3, CubeTexture, Engine, Observable, Scene, SceneLoader, TransformNode } from "@babylonjs/core";
+import { Color3, CubeTexture, Engine, Observable, PBRMaterial, Scene, SceneLoader, TransformNode } from "@babylonjs/core";
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
 import { Watch, WatchState } from "./watch";
 import { IShowroomCameraArcRotateState, IShowroomCameraMatchmoveState, ShowroomCamera } from "@syntheticmagus/showroom-scene";
 import { AdvancedDynamicTexture, CheckboxGroup, RadioGroup, Rectangle, SelectionPanel } from "@babylonjs/gui";
 import { WatchStuds } from "./watchStuds";
+import { GLTFFileLoader } from "@babylonjs/loaders";
 
 export enum ShowroomState {
     Overall,
@@ -125,6 +126,22 @@ export class Showroom {
     }
 
     public static async CreateAsync(engine: Engine, params: IVaporwearExperienceParams): Promise<Showroom> {
+        SceneLoader.OnPluginActivatedObservable.addOnce((plugin) => {
+            const loader = plugin as GLTFFileLoader;
+            if (!loader) {
+                return;
+            }
+
+            var specularOverAlpha = false;
+            var radianceOverAlpha = false;
+
+            loader.transparencyAsCoverage = true;
+            loader.onMaterialLoaded = (material) => {
+                specularOverAlpha = specularOverAlpha || (material as PBRMaterial).useSpecularOverAlpha;
+                radianceOverAlpha = radianceOverAlpha || (material as PBRMaterial).useRadianceOverAlpha;
+            };
+        });
+
         const scene = new Scene(engine);
         scene.clearColor = Color3.White().toColor4();
         scene.skipFrustumClipping = true;
