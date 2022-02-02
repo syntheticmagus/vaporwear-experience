@@ -19,6 +19,6 @@
     "@babylonjs/gui": ">5.0.0-beta",
     "@babylonjs/inspector": ">5.0.0-beta",
     "@babylonjs/loaders": ">5.0.0-beta",
-    "@syntheticmagus/showroom-scene": "../../showroom-camera/app_package"
+    "@syntheticmagus/showroom-camera": "^1.0.0"
   }
 }
