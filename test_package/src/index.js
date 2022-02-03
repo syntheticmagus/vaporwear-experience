@@ -41,5 +41,5 @@ VaporwearExperience.CreateAsync({
     assetUrlEnvironmentTexture: "outdoor.env",
     assetUrlDiamondFireTexture: "diamond_fire.env",
 }).then((experience) => {
-    experience.setCameraBehavior("face");
+    experience.createDebugUI();
 });

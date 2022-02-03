@@ -199,17 +199,15 @@ export class Showroom {
     }
 
     public createDebugtUI(): void {
-        const guiTexture = AdvancedDynamicTexture.CreateFullscreenUI("guiTexture", true, this._scene);
-        guiTexture.idealHeight = 700;
-        guiTexture.idealWidth = guiTexture.idealHeight * 16 / 9;
-
+        const hotspotTexture = AdvancedDynamicTexture.CreateFullscreenUI("hotspotTexture", true, this._scene);
+        
         const hotspot0 = new Rectangle("hotspot0");
         hotspot0.verticalAlignment = Rectangle.VERTICAL_ALIGNMENT_TOP;
         hotspot0.horizontalAlignment = Rectangle.HORIZONTAL_ALIGNMENT_LEFT;
         hotspot0.color = "red";
         hotspot0.widthInPixels = 10;
         hotspot0.heightInPixels = 10;
-        guiTexture.addControl(hotspot0);
+        hotspotTexture.addControl(hotspot0);
 
         const hotspot1 = new Rectangle("hotspot1");
         hotspot1.verticalAlignment = Rectangle.VERTICAL_ALIGNMENT_TOP;
@@ -217,7 +215,7 @@ export class Showroom {
         hotspot1.color = "blue";
         hotspot1.widthInPixels = 10;
         hotspot1.heightInPixels = 10;
-        guiTexture.addControl(hotspot1);
+        hotspotTexture.addControl(hotspot1);
 
         let showHotspots = false;
         this._scene.onBeforeRenderObservable.add(() => {
@@ -229,6 +227,10 @@ export class Showroom {
             hotspot1.leftInPixels = this._watch.hotspot1State.position.x;
             hotspot1.topInPixels = this._watch.hotspot1State.position.y;
         });
+
+        const guiTexture = AdvancedDynamicTexture.CreateFullscreenUI("guiTexture", true, this._scene);
+        guiTexture.idealHeight = 700;
+        guiTexture.idealWidth = guiTexture.idealHeight * 16 / 9;
 
         const stateGroup = new RadioGroup("State");
         stateGroup.addRadio("Overall", () => { this.state = ShowroomState.Overall; }, true);

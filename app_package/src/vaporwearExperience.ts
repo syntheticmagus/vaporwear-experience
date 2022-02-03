@@ -54,7 +54,7 @@ export class VaporwearExperience {
         const canvas = params.canvas;
         const engine = new Engine(canvas);
 
-        canvas.addEventListener("resize", () => {
+        window.addEventListener("resize", () => {
             engine.resize();
         });
 
