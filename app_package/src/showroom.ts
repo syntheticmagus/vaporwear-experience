@@ -16,6 +16,11 @@ export enum ShowroomState {
 
 export class Showroom {
     private _scene: Scene;
+
+    public get scene(): Scene {
+        return this._scene;
+    }
+
     private _state: ShowroomState;
 
     private _watch: Watch;
@@ -57,6 +62,7 @@ export class Showroom {
                 this._camera.animateToMatchmoveState(this._levitateState, 0.7);
                 break;
             case ShowroomState.Configure:
+                debugger;
                 this._watch.setState(WatchState.Configure);
                 this._camera.animateToArcRotateState(this._configureState, 0.7);
                 break;
@@ -72,6 +78,25 @@ export class Showroom {
         return this._configurationOptionsLoaded;
     }
     public configurationOptionsLoadedObservable: Observable<Showroom>;
+
+    public get hotspot0X(): number {
+        return this._watch.hotspot0State.position.x;
+    }
+    public get hotspot0Y(): number {
+        return this._watch.hotspot0State.position.y;
+    }
+    public get hotspot0IsVisible(): boolean {
+        return this._watch.hotspot0State.isVisible;
+    }
+    public get hotspot1X(): number {
+        return this._watch.hotspot1State.position.x;
+    }
+    public get hotspot1Y(): number {
+        return this._watch.hotspot1State.position.y;
+    }
+    public get hotspot1IsVisible(): boolean {
+        return this._watch.hotspot1State.isVisible;
+    }
 
     private constructor(scene: Scene, watch: Watch, studsPromise: Promise<WatchStuds>, materialsPromise: Promise<void>) {
         this._scene = scene;
@@ -213,7 +238,7 @@ export class Showroom {
         stateGroup.addRadio("Configure", () => { this.state = ShowroomState.Configure; }, false);
 
         const additionsGroup = new CheckboxGroup("Additions");
-        additionsGroup.addCheckbox("Studs", (checked) => { this._studs?.Mesh?.setEnabled(checked); }, false);
+        additionsGroup.addCheckbox("Studs", (checked) => { this.showStuds = checked; }, false);
 
         const bandsGroup = new RadioGroup("Bands");
         bandsGroup.addRadio("band_0", () => { this.setMeshMaterialByName("chassis", "band_0"); }, true);

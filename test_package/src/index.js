@@ -1,4 +1,4 @@
-import { initializeVaporwearExperience } from "app_package";
+import { VaporwearExperience } from "app_package";
 
 document.body.style.width = window.innerWidth + "px";
 document.body.style.height = window.innerHeight + "px";
@@ -31,7 +31,8 @@ if (DEV_BUILD) {
 } else {
     assetsHostUrl = "https://syntheticmagus.github.io/vaporwear-assets/";
 }
-initializeVaporwearExperience({ 
+
+VaporwearExperience.CreateAsync({
     canvas: canvas, 
     assetUrlRoot: assetsHostUrl,
     assetUrlWatch: "watch.glb",
@@ -39,4 +40,6 @@ initializeVaporwearExperience({
     assetUrlWatchMaterials: "watch_materials.glb",
     assetUrlEnvironmentTexture: "outdoor.env",
     assetUrlDiamondFireTexture: "diamond_fire.env",
+}).then((experience) => {
+    experience.setCameraBehavior("face");
 });
