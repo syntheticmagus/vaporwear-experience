@@ -99,6 +99,17 @@ export class VaporwearExperience {
         this._showroom.setMeshMaterialByName("glass", materialName);
     }
 
+    public setJewelry(jewelryName: string) {
+        switch (jewelryName) {
+            case "none":
+                this._showroom.showStuds = false;
+                break;
+            case "studs":
+                this._showroom.showStuds = true;
+                break;
+        }
+    }
+
     public setGemMaterial(materialName: string) {
         this._showroom.setMeshMaterialByName("diamond", materialName);
     }
