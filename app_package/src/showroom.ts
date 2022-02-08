@@ -1,10 +1,10 @@
 import { Color3, CubeTexture, Engine, Observable, PBRMaterial, Scene, SceneLoader, TransformNode } from "@babylonjs/core";
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
 import { Watch, WatchState } from "./watch";
-import { IShowroomCameraArcRotateState, IShowroomCameraMatchmoveState, ShowroomCamera } from "@syntheticmagus/showroom-camera";
 import { AdvancedDynamicTexture, CheckboxGroup, RadioGroup, Rectangle, SelectionPanel } from "@babylonjs/gui";
 import { WatchStuds } from "./watchStuds";
 import { GLTFFileLoader } from "@babylonjs/loaders";
+import { IShowroomCameraArcRotateState, IShowroomCameraMatchmoveState, ShowroomCamera } from "@syntheticmagus/showroom-camera";
 
 export enum ShowroomState {
     Overall,
@@ -47,23 +47,23 @@ export class Showroom {
         switch (this._state) {
             case ShowroomState.Overall:
                 this._watch.setState(WatchState.Overall);
-                this._camera.animateToMatchmoveState(this._overallState, 0.7);
+                this._camera.animateToMatchmoveState(this._overallState);
                 break;
             case ShowroomState.Clasp:
                 this._watch.setState(WatchState.Clasp);
-                this._camera.animateToMatchmoveState(this._claspState, 0.7);
+                this._camera.animateToMatchmoveState(this._claspState);
                 break;
             case ShowroomState.Face:
                 this._watch.setState(WatchState.Face);
-                this._camera.animateToMatchmoveState(this._faceState, 0.7);
+                this._camera.animateToMatchmoveState(this._faceState);
                 break;
             case ShowroomState.Levitate:
                 this._watch.setState(WatchState.Levitate);
-                this._camera.animateToMatchmoveState(this._levitateState, 0.7);
+                this._camera.animateToMatchmoveState(this._levitateState);
                 break;
             case ShowroomState.Configure:
                 this._watch.setState(WatchState.Configure);
-                this._camera.animateToArcRotateState(this._configureState, 0.7);
+                this._camera.animateToArcRotateState(this._configureState);
                 break;
         }
     }
@@ -98,13 +98,11 @@ export class Showroom {
     }
 
     public setZoomPercent(zoomPercent: number): void {
-        if (this._state === ShowroomState.Configure) {
-            this._camera.arcRotateCamera.radius = zoomPercent * (this._camera.arcRotateCamera.upperRadiusLimit! - this._camera.arcRotateCamera.lowerRadiusLimit!) + this._camera.arcRotateCamera.lowerRadiusLimit!;
-        }
+        this._camera.arcRotateZoomPercent = zoomPercent;
     }
 
     public disableMouseWheel(): void {
-        this._camera.arcRotateCamera.inputs.remove(this._camera.arcRotateCamera.inputs.attached.mousewheel);
+        this._camera.enableMouseWheel = false;
     }
 
     private constructor(scene: Scene, watch: Watch, studsPromise: Promise<WatchStuds>, materialsPromise: Promise<void>) {

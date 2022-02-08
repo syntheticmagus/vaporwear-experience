@@ -90,7 +90,10 @@ export class Watch extends TransformNode {
         this._animationOrbitClasp = animations.get("orbit_clasp")!;
         this._animationOrbitFace = animations.get("orbit_face")!;
         this._animationOrbitLevitate = animations.get("orbit_levitate")!;
-        
+
+        this._animationWatchSpinUp.speedRatio = 0.7;
+        this._animationWatchSpinDown.speedRatio = 0.7;
+
         this._animationWatchSpinDown.stop();
         this._animationWatchSpinUp.stop();
 

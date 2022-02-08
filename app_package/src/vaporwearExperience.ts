@@ -71,7 +71,7 @@ export class VaporwearExperience {
         this._showroom.setZoomPercent(zoomPercent);
     }
 
-    public disableMousewheel(): void {
+    public disableMouseWheel(): void {
         this._showroom.disableMouseWheel();
     }
 
