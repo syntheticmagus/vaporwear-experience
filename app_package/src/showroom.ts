@@ -62,7 +62,6 @@ export class Showroom {
                 this._camera.animateToMatchmoveState(this._levitateState, 0.7);
                 break;
             case ShowroomState.Configure:
-                debugger;
                 this._watch.setState(WatchState.Configure);
                 this._camera.animateToArcRotateState(this._configureState, 0.7);
                 break;
@@ -96,6 +95,16 @@ export class Showroom {
     }
     public get hotspot1IsVisible(): boolean {
         return this._watch.hotspot1State.isVisible;
+    }
+
+    public setZoomPercent(zoomPercent: number): void {
+        if (this._state === ShowroomState.Configure) {
+            this._camera.arcRotateCamera.radius = zoomPercent * (this._camera.arcRotateCamera.upperRadiusLimit! - this._camera.arcRotateCamera.lowerRadiusLimit!) + this._camera.arcRotateCamera.lowerRadiusLimit!;
+        }
+    }
+
+    public disableMouseWheel(): void {
+        this._camera.arcRotateCamera.inputs.remove(this._camera.arcRotateCamera.inputs.attached.mousewheel);
     }
 
     private constructor(scene: Scene, watch: Watch, studsPromise: Promise<WatchStuds>, materialsPromise: Promise<void>) {

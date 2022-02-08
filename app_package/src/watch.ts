@@ -95,8 +95,8 @@ export class Watch extends TransformNode {
         this._animationWatchSpinUp.stop();
 
         this._animationOrbitOverall.play(true);
-        this._animationOrbitClasp.stop();
-        this._animationOrbitFace.stop();
+        this._animationOrbitClasp.play(true);
+        this._animationOrbitFace.play(true);
         this._animationOrbitLevitate.stop();
 
         this._bodyBone = importWatchResult.skeletons[0].bones[2];
@@ -150,34 +150,37 @@ export class Watch extends TransformNode {
             this._animationWatchSpinUp.play(false);
         }
 
-        switch (this._state) {
-            case WatchState.Overall:
-                this._animationOrbitOverall.stop();
-                break;
-            case WatchState.Clasp:
-                this._animationOrbitClasp.stop();
-                break;
-            case WatchState.Face:
-                this._animationOrbitFace.stop();
-                break;
-            case WatchState.Levitate:
-                this._animationOrbitLevitate.stop();
-                break;
-        }
-
         switch (newState) {
             case WatchState.Overall:
                 this._animationOrbitOverall.play(true);
+                this._animationOrbitClasp.play(true);
+                this._animationOrbitClasp.play(true);
+                this._animationOrbitLevitate.stop();
                 break;
             case WatchState.Clasp:
+                this._animationOrbitOverall.play(true);
                 this._animationOrbitClasp.play(true);
+                this._animationOrbitClasp.play(true);
+                this._animationOrbitLevitate.stop();
                 this.getScene().onBeforeRenderObservable.runCoroutineAsync(this._updateHotspotVisibilityCoroutine());
                 break;
             case WatchState.Face:
-                this._animationOrbitFace.play(true);
+                this._animationOrbitOverall.play(true);
+                this._animationOrbitClasp.play(true);
+                this._animationOrbitClasp.play(true);
+                this._animationOrbitLevitate.stop();
                 break;
             case WatchState.Levitate:
+                this._animationOrbitOverall.stop();
+                this._animationOrbitClasp.stop();
+                this._animationOrbitClasp.stop();
                 this._animationOrbitLevitate.play(true);
+                break;
+            case WatchState.Configure:
+                this._animationOrbitOverall.stop();
+                this._animationOrbitClasp.stop();
+                this._animationOrbitClasp.stop();
+                this._animationOrbitLevitate.stop();
                 break;
         }
 

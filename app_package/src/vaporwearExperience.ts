@@ -67,8 +67,12 @@ export class VaporwearExperience {
         return new VaporwearExperience(showroom);
     }
 
-    public createDebugUI(): void {
-        this._showroom.createDebugtUI();
+    public setZoom(zoomPercent: number): void {
+        this._showroom.setZoomPercent(zoomPercent);
+    }
+
+    public disableMousewheel(): void {
+        this._showroom.disableMouseWheel();
     }
 
     public setCameraBehavior(behavior: string) {
@@ -117,8 +121,8 @@ export class VaporwearExperience {
     public setSettingMaterial(materialName: string) {
         this._showroom.setMeshMaterialByName("setting", materialName);
     }
-}
 
-export function initializeVaporwearExperience(params: IVaporwearExperienceParams) {
+    public createDebugUI(): void {
+        this._showroom.createDebugtUI();
+    }
 }
-
