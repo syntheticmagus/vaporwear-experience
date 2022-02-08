@@ -1,4 +1,5 @@
-import { AbstractMesh, AnimationGroup, Bone, ISceneLoaderAsyncResult, Matrix, Scene, SceneLoader, TmpVectors, TransformNode, Vector2, Vector3 } from "@babylonjs/core";
+import { AbstractMesh, AnimationGroup, Bone, ISceneLoaderAsyncResult, Matrix, PBRMaterial, Scene, SceneLoader, Texture, TmpVectors, Tools, TransformNode, Vector2, Vector3 } from "@babylonjs/core";
+import { AdvancedDynamicTexture, TextBlock } from "@babylonjs/gui";
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
 
 export enum WatchState {
@@ -120,6 +121,37 @@ export class Watch extends TransformNode {
             parent.scaling.z *= -1;
             parent.rotate(Vector3.RightReadOnly, -Math.PI / 2);
         });
+
+        const screen = scene.getMeshByName("screen")!;
+        const screenTexture = AdvancedDynamicTexture.CreateForMeshTexture(screen);
+        screenTexture.vScale = -1;
+        screenTexture.wrapV = Texture.WRAP_ADDRESSMODE;
+        (screen.material as PBRMaterial)!.emissiveTexture = screenTexture;
+
+        const hoursMinutes = new TextBlock("hoursMinutes", "00:00");
+        hoursMinutes.color = "white";
+        hoursMinutes.fontSizeInPixels = 200;
+        hoursMinutes.widthInPixels = 500;
+        hoursMinutes.leftInPixels = -100;
+        hoursMinutes.textHorizontalAlignment = TextBlock.HORIZONTAL_ALIGNMENT_RIGHT;
+        const seconds = new TextBlock("seconds", ":0");
+        seconds.color = "white";
+        seconds.fontSizeInPixels = 60;
+        seconds.leftInPixels = 200;
+        seconds.topInPixels = 50;
+        seconds.widthInPixels = 100;
+        seconds.textHorizontalAlignment = TextBlock.HORIZONTAL_ALIGNMENT_LEFT;
+        scene.onBeforeRenderObservable.runCoroutineAsync(function* () {
+            while (true) {
+                const date = new Date();
+                let hours = date.getHours() % 12;
+                hoursMinutes.text = (hours === 0 ? 12 : hours) + ":" + ("00" + date.getMinutes().toString()).slice(-2);
+                seconds.text = ":" + ("00" + date.getSeconds()).slice(-2);
+                yield Tools.DelayAsync(1000);
+            }
+        }());
+        screenTexture.addControl(hoursMinutes);
+        screenTexture.addControl(seconds);
 
         this._hotspot0 = scene.getTransformNodeByName("hotspot_0")!;
         this._hotspot1 = scene.getTransformNodeByName("hotspot_1")!;
