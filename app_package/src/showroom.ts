@@ -34,6 +34,8 @@ export class Showroom {
     private _levitateState: IShowroomCameraMatchmoveState;
     private _configureState: IShowroomCameraArcRotateState;
     
+    public onHotspotUpdatedObservable: Observable<{ hotspotId: number, visible: boolean, x: number, y: number }>;
+    
     public get state(): ShowroomState {
         return this._state;
     }
@@ -77,25 +79,6 @@ export class Showroom {
         return this._configurationOptionsLoaded;
     }
     public configurationOptionsLoadedObservable: Observable<Showroom>;
-
-    public get hotspot0X(): number {
-        return this._watch.hotspot0State.position.x;
-    }
-    public get hotspot0Y(): number {
-        return this._watch.hotspot0State.position.y;
-    }
-    public get hotspot0IsVisible(): boolean {
-        return this._watch.hotspot0State.isVisible;
-    }
-    public get hotspot1X(): number {
-        return this._watch.hotspot1State.position.x;
-    }
-    public get hotspot1Y(): number {
-        return this._watch.hotspot1State.position.y;
-    }
-    public get hotspot1IsVisible(): boolean {
-        return this._watch.hotspot1State.isVisible;
-    }
 
     public setZoomPercent(zoomPercent: number): void {
         this._camera.arcRotateZoomPercent = zoomPercent;
@@ -154,7 +137,23 @@ export class Showroom {
         Promise.all([studsPromise, materialsPromise]).then(() => {
             this._configurationOptionsLoaded = true;
             this.configurationOptionsLoadedObservable.notifyObservers(this);
-        })
+        });
+
+        this.onHotspotUpdatedObservable = new Observable();
+        this._watch.onHotspotsUpdatedObservable.add(() => {
+            this.onHotspotUpdatedObservable.notifyObservers({
+                hotspotId: 0,
+                visible: this._watch.hotspot0State.isVisible,
+                x: this._watch.hotspot0State.position.x,
+                y: this._watch.hotspot0State.position.y
+            });
+            this.onHotspotUpdatedObservable.notifyObservers({
+                hotspotId: 1,
+                visible: this._watch.hotspot1State.isVisible,
+                x: this._watch.hotspot1State.position.x,
+                y: this._watch.hotspot1State.position.y
+            });
+        });
     }
 
     public static async CreateAsync(engine: Engine, params: IVaporwearExperienceParams): Promise<Showroom> {

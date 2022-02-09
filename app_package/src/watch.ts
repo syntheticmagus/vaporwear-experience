@@ -1,4 +1,4 @@
-import { AbstractMesh, AnimationGroup, Bone, ISceneLoaderAsyncResult, Matrix, PBRMaterial, Scene, SceneLoader, Texture, TmpVectors, Tools, TransformNode, Vector2, Vector3 } from "@babylonjs/core";
+import { AbstractMesh, AnimationGroup, Bone, ISceneLoaderAsyncResult, Matrix, Observable, PBRMaterial, Scene, SceneLoader, Texture, TmpVectors, Tools, TransformNode, Vector2, Vector3 } from "@babylonjs/core";
 import { AdvancedDynamicTexture, TextBlock } from "@babylonjs/gui";
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
 
@@ -57,6 +57,7 @@ export class Watch extends TransformNode {
 
     public hotspot0State: HotspotState;
     public hotspot1State: HotspotState;
+    public onHotspotsUpdatedObservable: Observable<void>;
 
     private _state: WatchState;
 
@@ -130,7 +131,7 @@ export class Watch extends TransformNode {
 
         const hoursMinutes = new TextBlock("hoursMinutes", "00:00");
         hoursMinutes.color = "white";
-        hoursMinutes.fontSizeInPixels = 200;
+        hoursMinutes.fontSizeInPixels = 160;
         hoursMinutes.widthInPixels = 500;
         hoursMinutes.leftInPixels = -100;
         hoursMinutes.textHorizontalAlignment = TextBlock.HORIZONTAL_ALIGNMENT_RIGHT;
@@ -163,6 +164,7 @@ export class Watch extends TransformNode {
 
         this.hotspot0State = new HotspotState();
         this.hotspot1State = new HotspotState();
+        this.onHotspotsUpdatedObservable = new Observable();
 
         this._state = WatchState.Overall;
     }
@@ -251,6 +253,8 @@ export class Watch extends TransformNode {
             this.hotspot1State.isVisible = Math.abs(vec.x) < 1 && Math.abs(vec.y) < 1 && Math.abs(vec.z) < 1;
             Vector3.ProjectToRef(this._hotspot1.absolutePosition, Matrix.IdentityReadOnly, cameraViewProjMat, camera.viewport, vec);
             this.hotspot1State.position.copyFromFloats(vec.x * renderWidth, vec.y * renderHeight);
+
+            this.onHotspotsUpdatedObservable.notifyObservers();
 
             yield;
         }

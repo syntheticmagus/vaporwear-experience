@@ -14,40 +14,9 @@ export interface IHotspotState {
 
 export class VaporwearExperience {
     private _showroom: Showroom;
-    private _hotspot0State: IHotspotState;
-    private _hotspot1State: IHotspotState;
-
-    public get hotspot0(): IHotspotState {
-        return this._hotspot0State;
-    }
-
-    public get hotspot1(): IHotspotState {
-        return this._hotspot1State;
-    }
 
     private constructor(showroom: Showroom) {
         this._showroom = showroom;
-
-        this._hotspot0State = {
-            x: 0,
-            y: 0,
-            isVisible: false
-        };
-        this._hotspot1State = {
-            x: 0,
-            y: 0,
-            isVisible: false
-        };
-
-        this._showroom.scene.onBeforeRenderObservable.add(() => {
-            this._hotspot0State.x = this._showroom.hotspot0X;
-            this._hotspot0State.y = this._showroom.hotspot0Y;
-            this._hotspot0State.isVisible = this._showroom.hotspot0IsVisible;
-            
-            this._hotspot1State.x = this._showroom.hotspot1X;
-            this._hotspot1State.y = this._showroom.hotspot1Y;
-            this._hotspot1State.isVisible = this._showroom.hotspot1IsVisible;
-        });
     }
 
     public static async CreateAsync(params: IVaporwearExperienceParams): Promise<VaporwearExperience> {
@@ -124,5 +93,15 @@ export class VaporwearExperience {
 
     public createDebugUI(): void {
         this._showroom.createDebugtUI();
+    }
+
+    public addEventListener(event: string, callback: any): void {
+        switch (event) {
+            case "hotspotUpdate":
+                this._showroom.onHotspotUpdatedObservable.add((hotspotUpdate) => {
+                    callback(hotspotUpdate);
+                });
+                break;
+        }
     }
 }
