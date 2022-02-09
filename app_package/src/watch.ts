@@ -139,7 +139,7 @@ export class Watch extends TransformNode {
         seconds.color = "white";
         seconds.fontSizeInPixels = 60;
         seconds.leftInPixels = 200;
-        seconds.topInPixels = 50;
+        seconds.topInPixels = 35;
         seconds.widthInPixels = 100;
         seconds.textHorizontalAlignment = TextBlock.HORIZONTAL_ALIGNMENT_LEFT;
         scene.onBeforeRenderObservable.runCoroutineAsync(function* () {
