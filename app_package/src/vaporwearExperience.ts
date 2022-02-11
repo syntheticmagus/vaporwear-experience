@@ -1,6 +1,5 @@
 import "@babylonjs/loaders";
 import "@babylonjs/gui";
-import "@babylonjs/inspector";
 
 import { Engine } from "@babylonjs/core";
 import { Showroom, ShowroomState } from "./showroom";

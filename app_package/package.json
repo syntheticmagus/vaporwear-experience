@@ -1,6 +1,6 @@
 {
   "name": "@syntheticmagus/vaporwear-experience",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "lib/index.js",
   "types": "lib",
@@ -21,7 +21,6 @@
   "dependencies": {
     "@babylonjs/core": ">5.0.0-beta",
     "@babylonjs/gui": ">5.0.0-beta",
-    "@babylonjs/inspector": ">5.0.0-beta",
     "@babylonjs/loaders": ">5.0.0-beta",
     "@syntheticmagus/showroom-camera": "^1.0.3"
   }
