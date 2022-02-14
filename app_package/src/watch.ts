@@ -179,12 +179,25 @@ export class Watch extends TransformNode {
             return;
         }
 
+        let frame = 0;
         if (WatchStateHelpers.IsUpState(this._state) && !WatchStateHelpers.IsUpState(newState)) {
-            this._animationWatchSpinUp.stop();
+            if (this._animationWatchSpinUp.isPlaying) {
+                frame = this._animationWatchSpinUp.animatables[0].masterFrame;
+                this._animationWatchSpinUp.stop();
+            } else {
+                frame = this._animationWatchSpinDown.to;
+            }
             this._animationWatchSpinDown.play(false);
+            this._animationWatchSpinDown.goToFrame(this._animationWatchSpinDown.to - frame);
         } else if (!WatchStateHelpers.IsUpState(this._state) && WatchStateHelpers.IsUpState(newState)) {
-            this._animationWatchSpinDown.stop();
+            if (this._animationWatchSpinDown.isPlaying) {
+                frame = this._animationWatchSpinDown.animatables[0].masterFrame;
+                this._animationWatchSpinDown.stop();
+            } else {
+                frame = this._animationWatchSpinUp.to;
+            }
             this._animationWatchSpinUp.play(false);
+            this._animationWatchSpinUp.goToFrame(this._animationWatchSpinUp.to - frame);
         }
 
         switch (newState) {
