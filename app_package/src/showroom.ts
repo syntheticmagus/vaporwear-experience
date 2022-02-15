@@ -153,6 +153,12 @@ export class Showroom {
                 x: this._watch.hotspot1State.position.x,
                 y: this._watch.hotspot1State.position.y
             });
+            this.onHotspotUpdatedObservable.notifyObservers({
+                hotspotId: 2,
+                visible: this._watch.hotspot2State.isVisible,
+                x: this._watch.hotspot2State.position.x,
+                y: this._watch.hotspot2State.position.y
+            });
         });
     }
 
@@ -223,6 +229,14 @@ export class Showroom {
         hotspot1.heightInPixels = 10;
         hotspotTexture.addControl(hotspot1);
 
+        const hotspot2 = new Rectangle("hotspot2");
+        hotspot2.verticalAlignment = Rectangle.VERTICAL_ALIGNMENT_TOP;
+        hotspot2.horizontalAlignment = Rectangle.HORIZONTAL_ALIGNMENT_LEFT;
+        hotspot2.color = "green";
+        hotspot2.widthInPixels = 10;
+        hotspot2.heightInPixels = 10;
+        hotspotTexture.addControl(hotspot2);
+
         let showHotspots = false;
         this._scene.onBeforeRenderObservable.add(() => {
             hotspot0.isVisible = showHotspots && this._watch.hotspot0State.isVisible;
@@ -232,6 +246,10 @@ export class Showroom {
             hotspot1.isVisible = showHotspots && this._watch.hotspot1State.isVisible;
             hotspot1.leftInPixels = this._watch.hotspot1State.position.x;
             hotspot1.topInPixels = this._watch.hotspot1State.position.y;
+
+            hotspot2.isVisible = showHotspots && this._watch.hotspot2State.isVisible;
+            hotspot2.leftInPixels = this._watch.hotspot2State.position.x;
+            hotspot2.topInPixels = this._watch.hotspot2State.position.y;
         });
 
         const guiTexture = AdvancedDynamicTexture.CreateFullscreenUI("guiTexture", true, this._scene);

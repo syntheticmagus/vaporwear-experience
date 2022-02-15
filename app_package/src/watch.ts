@@ -53,11 +53,14 @@ export class Watch extends TransformNode {
 
     private _hotspot0: TransformNode;
     private _hotspot1: TransformNode;
+    private _hotspot2: TransformNode;
     private _hotspot0Visibility: TransformNode;
     private _hotspot1Visibility: TransformNode;
+    private _hotspot2Visibility: TransformNode;
 
     public hotspot0State: HotspotState;
     public hotspot1State: HotspotState;
+    public hotspot2State: HotspotState;
     public onHotspotsUpdatedObservable: Observable<void>;
 
     private _state: WatchState;
@@ -161,11 +164,14 @@ export class Watch extends TransformNode {
 
         this._hotspot0 = scene.getTransformNodeByName("hotspot_0")!;
         this._hotspot1 = scene.getTransformNodeByName("hotspot_1")!;
+        this._hotspot2 = scene.getTransformNodeByName("hotspot_2")!;
         this._hotspot0Visibility = this._hotspot0.getChildTransformNodes()[0];
         this._hotspot1Visibility = this._hotspot1.getChildTransformNodes()[0];
+        this._hotspot2Visibility = this._hotspot2.getChildTransformNodes()[0];
 
         this.hotspot0State = new HotspotState();
         this.hotspot1State = new HotspotState();
+        this.hotspot2State = new HotspotState();
         this.onHotspotsUpdatedObservable = new Observable();
 
         this._state = WatchState.Overall;
@@ -218,7 +224,7 @@ export class Watch extends TransformNode {
                 this._animationOrbitLevitate.stop();
                 this._animationHotspot0Visibility.play(true);
                 this._animationHotspot1Visibility.play(true);
-                this.getScene().onBeforeRenderObservable.runCoroutineAsync(this._updateHotspotVisibilityCoroutine());
+                this.getScene().onBeforeRenderObservable.runCoroutineAsync(this._updateClaspHotspotVisibilityCoroutine());
                 break;
             case WatchState.Face:
                 this._animationOrbitOverall.play(true);
@@ -243,6 +249,7 @@ export class Watch extends TransformNode {
                 this._animationOrbitLevitate.stop();
                 this._animationHotspot0Visibility.stop();
                 this._animationHotspot1Visibility.stop();
+                this.getScene().onBeforeRenderObservable.runCoroutineAsync(this._updateConfigureHotspotVisibilityCoroutine());
                 break;
         }
 
@@ -250,19 +257,16 @@ export class Watch extends TransformNode {
         return;
     }
 
-    private *_updateHotspotVisibilityCoroutine() {
+    private *_updateClaspHotspotVisibilityCoroutine() {
         const scene = this.getScene();
         const engine = scene.getEngine();
         let renderWidth = -1;
         let renderHeight = -1;
         while (this._state === WatchState.Clasp) {
             const camera = scene.activeCamera!;
-            const cameraWorldMat = camera.getWorldMatrix();
             const cameraViewProjMat = camera.getTransformationMatrix();
-            const cameraPos = TmpVectors.Vector3[0];
             renderWidth = engine.getRenderWidth();
             renderHeight = engine.getRenderHeight();
-            cameraPos.copyFromFloats(cameraWorldMat.m[12], cameraWorldMat.m[13], cameraWorldMat.m[14]);
 
             const vec = TmpVectors.Vector3[1];
 
@@ -281,6 +285,36 @@ export class Watch extends TransformNode {
 
         this.hotspot0State.isVisible = false;
         this.hotspot1State.isVisible = false;
+    }
+
+    private *_updateConfigureHotspotVisibilityCoroutine() {
+        const scene = this.getScene();
+        const engine = scene.getEngine();
+        let renderWidth = -1;
+        let renderHeight = -1;
+        while (this._state === WatchState.Configure) {
+            const camera = scene.activeCamera!;
+            const cameraWorldMat = camera.getWorldMatrix();
+            const cameraViewProjMat = camera.getTransformationMatrix();
+            const cameraPos = TmpVectors.Vector3[0];
+            renderWidth = engine.getRenderWidth();
+            renderHeight = engine.getRenderHeight();
+            cameraPos.copyFromFloats(cameraWorldMat.m[12], cameraWorldMat.m[13], cameraWorldMat.m[14]);
+
+            const vec = TmpVectors.Vector3[1];
+
+            cameraPos.subtractToRef(this._hotspot2.absolutePosition, vec);
+            vec.normalize();
+            this.hotspot2State.isVisible = Vector3.Dot(vec, this._hotspot2.right) > this._hotspot2Visibility.position.x;
+            Vector3.ProjectToRef(this._hotspot2.absolutePosition, Matrix.IdentityReadOnly, cameraViewProjMat, camera.viewport, vec);
+            this.hotspot2State.position.copyFromFloats(vec.x * renderWidth, vec.y * renderHeight);
+
+            this.onHotspotsUpdatedObservable.notifyObservers();
+
+            yield;
+        }
+
+        this.hotspot2State.isVisible = false;
     }
 
     public attachToBodyBone(mesh: AbstractMesh): void {
