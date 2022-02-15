@@ -1,4 +1,4 @@
-import { Color3, CubeTexture, Engine, Observable, PBRMaterial, Scene, SceneLoader, TransformNode } from "@babylonjs/core";
+import { Color3, CubeTexture, Engine, ISceneLoaderAsyncResult, Observable, PBRMaterial, Scene, SceneLoader, TransformNode } from "@babylonjs/core";
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
 import { Watch, WatchState } from "./watch";
 import { AdvancedDynamicTexture, CheckboxGroup, RadioGroup, Rectangle, SelectionPanel } from "@babylonjs/gui";
@@ -88,7 +88,7 @@ export class Showroom {
         this._camera.enableMouseWheel = false;
     }
 
-    private constructor(scene: Scene, watch: Watch, studsPromise: Promise<WatchStuds>, materialsPromise: Promise<void>) {
+    private constructor(scene: Scene, watch: Watch, studsPromise: Promise<WatchStuds>, materialsPromise: Promise<ISceneLoaderAsyncResult>) {
         this._scene = scene;
         this._state = ShowroomState.Overall;
 
@@ -130,6 +130,14 @@ export class Showroom {
             studs.Mesh.setEnabled(false);
             this._studs = studs;
             watch.attachToBodyBone(studs.Mesh);
+        });
+
+        materialsPromise.then((result) => {
+            // Force compilation for band materials to prevent flashing on configuration.
+            const chassis = this._scene.getMeshByName("chassis")!;
+            for (let idx = 1; idx < result.meshes.length; ++idx) {
+                result.meshes[idx].material!.forceCompilationAsync(chassis);
+            }
         });
 
         this._configurationOptionsLoaded = false;
@@ -191,6 +199,7 @@ export class Showroom {
         
         const materialsPromise = SceneLoader.ImportMeshAsync("", params.assetUrlRoot, params.assetUrlWatchMaterials, scene).then((result) => {
             result.meshes[0].setEnabled(false);
+            return result;
         });
 
         return new Showroom(scene, watch, studsPromise, materialsPromise);
