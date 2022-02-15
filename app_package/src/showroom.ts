@@ -135,9 +135,8 @@ export class Showroom {
         materialsPromise.then((result) => {
             // Force compilation for band materials to prevent flashing on configuration.
             const chassis = this._scene.getMeshByName("chassis")!;
-            for (let idx = 1; idx < result.meshes.length; ++idx) {
-                result.meshes[idx].material!.forceCompilationAsync(chassis);
-            }
+            const material = this._scene.getMaterialByName("band_1")!;
+            material.forceCompilationAsync(chassis);
         });
 
         this._configurationOptionsLoaded = false;
