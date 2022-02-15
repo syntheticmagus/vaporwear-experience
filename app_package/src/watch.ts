@@ -40,6 +40,8 @@ export class Watch extends TransformNode {
     private _animationOrbitClasp: AnimationGroup;
     private _animationOrbitFace: AnimationGroup;
     private _animationOrbitLevitate: AnimationGroup;
+    private _animationHotspot0Visibility: AnimationGroup;
+    private _animationHotspot1Visibility: AnimationGroup;
 
     private _bodyBone: Bone;
     private _rootMesh: AbstractMesh;
@@ -51,9 +53,8 @@ export class Watch extends TransformNode {
 
     private _hotspot0: TransformNode;
     private _hotspot1: TransformNode;
-
-    private _viewbox0: AbstractMesh;
-    private _viewbox1: AbstractMesh;
+    private _hotspot0Visibility: TransformNode;
+    private _hotspot1Visibility: TransformNode;
 
     public hotspot0State: HotspotState;
     public hotspot1State: HotspotState;
@@ -92,6 +93,8 @@ export class Watch extends TransformNode {
         this._animationOrbitClasp = animations.get("orbit_clasp")!;
         this._animationOrbitFace = animations.get("orbit_face")!;
         this._animationOrbitLevitate = animations.get("orbit_levitate")!;
+        this._animationHotspot0Visibility = animations.get("hotspot_0_visibility")!;
+        this._animationHotspot1Visibility = animations.get("hotspot_1_visibility")!;
 
         this._animationWatchSpinUp.speedRatio = 0.7;
         this._animationWatchSpinDown.speedRatio = 0.7;
@@ -102,6 +105,8 @@ export class Watch extends TransformNode {
         this._animationOrbitOverall.play(true);
         this._animationOrbitClasp.play(true);
         this._animationOrbitFace.play(true);
+        this._animationHotspot0Visibility.play(true);
+        this._animationHotspot1Visibility.play(true);
         this._animationOrbitLevitate.stop();
 
         this._bodyBone = importWatchResult.skeletons[0].bones[2];
@@ -156,11 +161,8 @@ export class Watch extends TransformNode {
 
         this._hotspot0 = scene.getTransformNodeByName("hotspot_0")!;
         this._hotspot1 = scene.getTransformNodeByName("hotspot_1")!;
-
-        this._viewbox0 = scene.getMeshByName("viewbox_0")!;
-        this._viewbox0.isVisible = false;
-        this._viewbox1 = scene.getMeshByName("viewbox_1")!;
-        this._viewbox1.isVisible = false;
+        this._hotspot0Visibility = this._hotspot0.getChildTransformNodes()[0];
+        this._hotspot1Visibility = this._hotspot1.getChildTransformNodes()[0];
 
         this.hotspot0State = new HotspotState();
         this.hotspot1State = new HotspotState();
@@ -204,33 +206,43 @@ export class Watch extends TransformNode {
             case WatchState.Overall:
                 this._animationOrbitOverall.play(true);
                 this._animationOrbitClasp.play(true);
-                this._animationOrbitClasp.play(true);
+                this._animationOrbitFace.play(true);
                 this._animationOrbitLevitate.stop();
+                this._animationHotspot0Visibility.play(true);
+                this._animationHotspot1Visibility.play(true);
                 break;
             case WatchState.Clasp:
                 this._animationOrbitOverall.play(true);
                 this._animationOrbitClasp.play(true);
-                this._animationOrbitClasp.play(true);
+                this._animationOrbitFace.play(true);
                 this._animationOrbitLevitate.stop();
+                this._animationHotspot0Visibility.play(true);
+                this._animationHotspot1Visibility.play(true);
                 this.getScene().onBeforeRenderObservable.runCoroutineAsync(this._updateHotspotVisibilityCoroutine());
                 break;
             case WatchState.Face:
                 this._animationOrbitOverall.play(true);
                 this._animationOrbitClasp.play(true);
-                this._animationOrbitClasp.play(true);
+                this._animationOrbitFace.play(true);
                 this._animationOrbitLevitate.stop();
+                this._animationHotspot0Visibility.play(true);
+                this._animationHotspot1Visibility.play(true);
                 break;
             case WatchState.Levitate:
                 this._animationOrbitOverall.stop();
                 this._animationOrbitClasp.stop();
-                this._animationOrbitClasp.stop();
+                this._animationOrbitFace.stop();
                 this._animationOrbitLevitate.play(true);
+                this._animationHotspot0Visibility.stop();
+                this._animationHotspot1Visibility.stop();
                 break;
             case WatchState.Configure:
                 this._animationOrbitOverall.stop();
                 this._animationOrbitClasp.stop();
-                this._animationOrbitClasp.stop();
+                this._animationOrbitFace.stop();
                 this._animationOrbitLevitate.stop();
+                this._animationHotspot0Visibility.stop();
+                this._animationHotspot1Visibility.stop();
                 break;
         }
 
@@ -253,17 +265,12 @@ export class Watch extends TransformNode {
             cameraPos.copyFromFloats(cameraWorldMat.m[12], cameraWorldMat.m[13], cameraWorldMat.m[14]);
 
             const vec = TmpVectors.Vector3[1];
-            const viewMat = TmpVectors.Matrix[0];
 
-            this._viewbox0.getWorldMatrix().invertToRef(viewMat);
-            Vector3.TransformCoordinatesToRef(cameraPos, viewMat, vec);
-            this.hotspot0State.isVisible = Math.abs(vec.x) < 1 && Math.abs(vec.y) < 1 && Math.abs(vec.z) < 1;
+            this.hotspot0State.isVisible = this._hotspot0Visibility.position.x > 0.01;
             Vector3.ProjectToRef(this._hotspot0.absolutePosition, Matrix.IdentityReadOnly, cameraViewProjMat, camera.viewport, vec);
             this.hotspot0State.position.copyFromFloats(vec.x * renderWidth, vec.y * renderHeight);
             
-            this._viewbox1.getWorldMatrix().invertToRef(viewMat);
-            Vector3.TransformCoordinatesToRef(cameraPos, viewMat, vec);
-            this.hotspot1State.isVisible = Math.abs(vec.x) < 1 && Math.abs(vec.y) < 1 && Math.abs(vec.z) < 1;
+            this.hotspot1State.isVisible = this._hotspot1Visibility.position.x > 0.01;
             Vector3.ProjectToRef(this._hotspot1.absolutePosition, Matrix.IdentityReadOnly, cameraViewProjMat, camera.viewport, vec);
             this.hotspot1State.position.copyFromFloats(vec.x * renderWidth, vec.y * renderHeight);
 
