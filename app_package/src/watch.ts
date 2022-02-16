@@ -112,8 +112,10 @@ export class Watch extends TransformNode {
         this._animationHotspot1Visibility.play(true);
         this._animationOrbitLevitate.stop();
 
-        this._bodyBone = importWatchResult.skeletons[0].bones[2];
         this._rootMesh = importWatchResult.meshes[0];
+
+        const skeleton = importWatchResult.skeletons[0];
+        this._bodyBone = skeleton.bones[skeleton.getBoneIndexByName("Bone")];
 
         // Note: this convenience approach takes a hard dependency on there only being one watch in the scene.
         this._cameraParentOverall = scene.getTransformNodeByName("camera_overall")!;
