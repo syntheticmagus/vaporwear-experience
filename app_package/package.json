@@ -1,6 +1,6 @@
 {
   "name": "@syntheticmagus/vaporwear-experience",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "",
   "main": "lib/index.js",
   "types": "lib",
@@ -22,6 +22,6 @@
     "@babylonjs/core": ">5.0.0-beta",
     "@babylonjs/gui": ">5.0.0-beta",
     "@babylonjs/loaders": ">5.0.0-beta",
-    "@syntheticmagus/showroom-camera": "^1.0.3"
+    "@syntheticmagus/showroom-camera": "^1.0.4"
   }
 }

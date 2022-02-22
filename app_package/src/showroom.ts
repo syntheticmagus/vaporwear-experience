@@ -282,7 +282,7 @@ export class Showroom {
         bandsGroup.addRadio("band_4", () => { this.setMeshMaterialByName("chassis", "band_4"); }, false);
         
         const hotspotsGroup = new CheckboxGroup("Hotspots");
-        hotspotsGroup.addCheckbox("Clasp", (checked) => { showHotspots = checked; }, false);
+        hotspotsGroup.addCheckbox("Show", (checked) => { showHotspots = checked; }, false);
 
         const leftSelectionPanel = new SelectionPanel("leftSelectionPanel", [stateGroup, additionsGroup, bandsGroup, hotspotsGroup]);
         leftSelectionPanel.verticalAlignment = SelectionPanel.VERTICAL_ALIGNMENT_TOP;
