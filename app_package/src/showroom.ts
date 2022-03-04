@@ -1,4 +1,4 @@
-import { Color3, CubeTexture, Engine, ISceneLoaderAsyncResult, Observable, PBRMaterial, Scene, SceneLoader, TransformNode } from "@babylonjs/core";
+import { Color3, CubeTexture, Engine, ISceneLoaderAsyncResult, Observable, PBRMaterial, Scene, SceneLoader, Tools, TransformNode } from "@babylonjs/core";
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
 import { Watch, WatchState } from "./watch";
 import { AdvancedDynamicTexture, CheckboxGroup, RadioGroup, Rectangle, SelectionPanel } from "@babylonjs/gui";
@@ -194,12 +194,15 @@ export class Showroom {
         scene.environmentTexture = environmentTexture;
 
         const watch = await Watch.createAsync(scene, params);
-        const studsPromise = WatchStuds.CreateAsync(scene, params);
+        const studsPromise = Tools.DelayAsync(1000).then(() => {
+            return WatchStuds.CreateAsync(scene, params);
+        });
         
-        const materialsPromise = SceneLoader.ImportMeshAsync("", params.assetUrlRoot, params.assetUrlWatchMaterials, scene).then((result) => {
+        const materialsPromise = Tools.DelayAsync(4000).then(() => {
+            return SceneLoader.ImportMeshAsync("", params.assetUrlRoot + "/" + params.assetUrlWatchMaterials, undefined, scene).then((result) => {
             result.meshes[0].setEnabled(false);
             return result;
-        });
+        })});
 
         return new Showroom(scene, watch, studsPromise, materialsPromise);
     }

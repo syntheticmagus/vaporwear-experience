@@ -13,7 +13,7 @@ export class WatchStuds {
     }
 
     public static async CreateAsync(scene: Scene, params: IVaporwearExperienceParams): Promise<WatchStuds> {
-        const importStudsResult = await SceneLoader.ImportMeshAsync("", params.assetUrlRoot, params.assetUrlWatchStuds, scene);
+        const importStudsResult = await SceneLoader.ImportMeshAsync("", params.assetUrlRoot + "/" + params.assetUrlWatchStuds, undefined, scene);
 
         const fireTexture = CubeTexture.CreateFromPrefilteredData(params.assetUrlRoot + params.assetUrlDiamondFireTexture, scene);
         (scene.getMaterialByName("diamond_fire") as PBRMaterial).reflectionTexture = fireTexture;

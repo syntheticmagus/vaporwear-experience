@@ -180,7 +180,7 @@ export class Watch extends TransformNode {
     }
 
     public static async createAsync(scene: Scene, params: IVaporwearExperienceParams): Promise<Watch> {
-        const importWatchResult = await SceneLoader.ImportMeshAsync("", params.assetUrlRoot, params.assetUrlWatch, scene);
+        const importWatchResult = await SceneLoader.ImportMeshAsync("", params.assetUrlRoot + "/" + params.assetUrlWatch, undefined, scene);
         return new Watch(scene, importWatchResult);
     }
 

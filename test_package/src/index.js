@@ -35,9 +35,9 @@ if (DEV_BUILD) {
 VaporwearExperience.CreateAsync({
     canvas: canvas, 
     assetUrlRoot: assetsHostUrl,
-    assetUrlWatch: "watch.glb",
-    assetUrlWatchStuds: "watch_studs.glb",
-    assetUrlWatchMaterials: "watch_materials.glb",
+    assetUrlWatch: "watch/watch.gltf",
+    assetUrlWatchStuds: "watch_studs/watch_studs.gltf",
+    assetUrlWatchMaterials: "watch_materials/watch_materials.gltf",
     assetUrlEnvironmentTexture: "outdoor.env",
     assetUrlDiamondFireTexture: "diamond_fire.env",
 }).then((experience) => {
