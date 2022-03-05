@@ -38,7 +38,7 @@ VaporwearExperience.CreateAsync({
     assetUrlWatch: "watch.glb",
     assetUrlWatchStuds: "watch_studs.glb",
     assetUrlWatchMaterials: "watch_materials.glb",
-    assetUrlEnvironmentTexture: "outdoor.env",
+    assetUrlEnvironmentTexture: "studio.env",
     assetUrlDiamondFireTexture: "diamond_fire.env",
 }).then((experience) => {
     experience.createDebugUI();

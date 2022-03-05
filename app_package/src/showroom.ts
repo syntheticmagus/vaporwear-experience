@@ -22,6 +22,7 @@ export class Showroom {
     }
 
     private _state: ShowroomState;
+    private _stateSetToConfigurationObservable: Observable<void>;
 
     private _watch: Watch;
     private _studs?: WatchStuds;
@@ -33,7 +34,7 @@ export class Showroom {
     private _faceState: IShowroomCameraMatchmoveState;
     private _levitateState: IShowroomCameraMatchmoveState;
     private _configureState: IShowroomCameraArcRotateState;
-    
+
     public onHotspotUpdatedObservable: Observable<{ hotspotId: number, visible: boolean, x: number, y: number }>;
     
     public get state(): ShowroomState {
@@ -65,7 +66,9 @@ export class Showroom {
                 break;
             case ShowroomState.Configure:
                 this._watch.setState(WatchState.Configure);
-                this._camera.animateToArcRotateState(this._configureState);
+                this._camera.animateToArcRotateState(this._configureState).then(() => {
+                    this._stateSetToConfigurationObservable.notifyObservers();
+                });
                 break;
         }
     }
@@ -88,9 +91,10 @@ export class Showroom {
         this._camera.enableMouseWheel = false;
     }
 
-    private constructor(scene: Scene, watch: Watch, studsPromise: Promise<WatchStuds>, materialsPromise: Promise<ISceneLoaderAsyncResult>) {
+    private constructor(scene: Scene, watch: Watch, params: IVaporwearExperienceParams) {
         this._scene = scene;
         this._state = ShowroomState.Overall;
+        this._stateSetToConfigurationObservable = new Observable();
 
         this._watch = watch;
 
@@ -126,11 +130,30 @@ export class Showroom {
         this._camera.setToMatchmoveState(this._overallState);
         this._state = ShowroomState.Overall;
 
+        const configurationPromise = new Promise<void>((resolve) => 
+        {
+            this._stateSetToConfigurationObservable.addOnce(() => {
+                resolve();
+            });
+        });
+
+        fetch(params.assetUrlRoot + "/" + params.assetUrlWatchStuds);
+        const studsPromise = configurationPromise.then(() => {
+            return WatchStuds.CreateAsync(scene, params);
+        });
+
         studsPromise.then((studs) => {
             studs.Mesh.setEnabled(false);
             this._studs = studs;
             watch.attachToBodyBone(studs.Mesh);
         });
+        
+        fetch(params.assetUrlRoot + "/" + params.assetUrlWatchMaterials);
+        const materialsPromise = configurationPromise.then(() => {
+            return SceneLoader.ImportMeshAsync("", params.assetUrlRoot, params.assetUrlWatchMaterials, scene).then((result) => {
+            result.meshes[0].setEnabled(false);
+            return result;
+        })});
 
         materialsPromise.then((result) => {
             // Force compilation for band materials to prevent flashing on configuration.
@@ -194,17 +217,8 @@ export class Showroom {
         scene.environmentTexture = environmentTexture;
 
         const watch = await Watch.createAsync(scene, params);
-        const studsPromise = Tools.DelayAsync(1000).then(() => {
-            return WatchStuds.CreateAsync(scene, params);
-        });
-        
-        const materialsPromise = Tools.DelayAsync(4000).then(() => {
-            return SceneLoader.ImportMeshAsync("", params.assetUrlRoot, params.assetUrlWatchMaterials, scene).then((result) => {
-            result.meshes[0].setEnabled(false);
-            return result;
-        })});
 
-        return new Showroom(scene, watch, studsPromise, materialsPromise);
+        return new Showroom(scene, watch, params);
     }
 
     public render(): void {
