@@ -199,7 +199,7 @@ export class Showroom {
         });
         
         const materialsPromise = Tools.DelayAsync(4000).then(() => {
-            return SceneLoader.ImportMeshAsync("", params.assetUrlRoot + "/" + params.assetUrlWatchMaterials, undefined, scene).then((result) => {
+            return SceneLoader.ImportMeshAsync("", params.assetUrlRoot, params.assetUrlWatchMaterials, scene).then((result) => {
             result.meshes[0].setEnabled(false);
             return result;
         })});
