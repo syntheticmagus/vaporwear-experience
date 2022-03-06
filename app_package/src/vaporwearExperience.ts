@@ -101,6 +101,14 @@ export class VaporwearExperience {
                     callback(hotspotUpdate);
                 });
                 break;
+            case "configurationOptionsLoaded":
+                if (this._showroom.configurationOptionsLoaded) {
+                    callback();
+                } else {
+                    this._showroom.configurationOptionsLoadedObservable.addOnce(() => {
+                        callback();
+                    });
+                }
         }
     }
 }
