@@ -1,9 +1,10 @@
 import "@babylonjs/loaders";
 import "@babylonjs/gui";
 
-import { Engine } from "@babylonjs/core";
+import { Engine, SceneLoader } from "@babylonjs/core";
 import { Showroom, ShowroomState } from "./showroom";
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
+import { GLTFFileLoader } from "@babylonjs/loaders";
 
 export interface IHotspotState {
     x: number;
@@ -19,8 +20,17 @@ export class VaporwearExperience {
     }
 
     public static async CreateAsync(params: IVaporwearExperienceParams): Promise<VaporwearExperience> {
+        SceneLoader.OnPluginActivatedObservable.add((plugin) => {
+            if (plugin.name === "gltf") {
+                const loader = plugin as GLTFFileLoader;
+                loader.transparencyAsCoverage = true;
+            }
+        });
+
         const canvas = params.canvas;
-        const engine = new Engine(canvas);
+        const engine = new Engine(canvas, undefined, {
+            forceSRGBBufferSupportState: true
+        });
 
         window.addEventListener("resize", () => {
             engine.resize();
