@@ -67,6 +67,8 @@ export class Showroom {
             case ShowroomState.Configure:
                 this._watch.setState(WatchState.Configure);
                 this._camera.animateToArcRotateState(this._configureState).then(() => {
+                    return Tools.DelayAsync(300);
+                }).then(() => {
                     this._stateSetToConfigurationObservable.notifyObservers();
                 });
                 break;
