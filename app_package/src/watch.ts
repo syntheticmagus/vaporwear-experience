@@ -1,5 +1,17 @@
-import { AbstractMesh, AnimationGroup, Bone, ISceneLoaderAsyncResult, Matrix, Observable, PBRMaterial, Scene, SceneLoader, Texture, TmpVectors, Tools, TransformNode, Vector2, Vector3 } from "@babylonjs/core";
-import { AdvancedDynamicTexture, TextBlock } from "@babylonjs/gui";
+import { AnimationGroup } from "@babylonjs/core/Animations/animationGroup";
+import { Bone } from "@babylonjs/core/Bones/bone";
+import { ISceneLoaderAsyncResult, SceneLoader } from "@babylonjs/core/Loading/sceneLoader";
+import { PBRMaterial } from "@babylonjs/core/Materials/PBR/pbrMaterial";
+import { Texture } from "@babylonjs/core/Materials/Textures/texture";
+import { Matrix, TmpVectors, Vector2, Vector3 } from "@babylonjs/core/Maths/math";
+import { AbstractMesh } from "@babylonjs/core/Meshes/abstractMesh";
+import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
+import { Observable } from "@babylonjs/core/Misc/observable";
+import "@babylonjs/core/Misc/observableCoroutine";
+import { Tools } from "@babylonjs/core/Misc/tools";
+import { Scene } from "@babylonjs/core/scene";
+import { AdvancedDynamicTexture } from "@babylonjs/gui/2D/advancedDynamicTexture";
+import { TextBlock } from "@babylonjs/gui/2D/controls/textBlock";
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
 
 export enum WatchState {

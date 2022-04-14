@@ -1,4 +1,8 @@
-import { AbstractMesh, CubeTexture, ISceneLoaderAsyncResult, PBRMaterial, Scene, SceneLoader } from "@babylonjs/core";
+import { ISceneLoaderAsyncResult, SceneLoader } from "@babylonjs/core/Loading/sceneLoader";
+import { PBRMaterial } from "@babylonjs/core/Materials/PBR/pbrMaterial";
+import { CubeTexture } from "@babylonjs/core/Materials/Textures/cubeTexture";
+import { AbstractMesh } from "@babylonjs/core/Meshes/abstractMesh";
+import { Scene } from "@babylonjs/core/scene";
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
 
 export class WatchStuds {

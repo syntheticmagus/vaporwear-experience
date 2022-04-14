@@ -1,9 +1,19 @@
-import { Color3, CubeTexture, Engine, Observable, Scene, SceneLoader, Tools, TransformNode } from "@babylonjs/core";
+import { Engine } from "@babylonjs/core/Engines/engine";
+import { SceneLoader } from "@babylonjs/core/Loading/sceneLoader";
+import { CubeTexture } from "@babylonjs/core/Materials/Textures/cubeTexture";
+import { Color3 } from "@babylonjs/core/Maths/math";
+import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
+import { Observable } from "@babylonjs/core/Misc/observable";
+import "@babylonjs/core/Misc/observableCoroutine";
+import { Tools } from "@babylonjs/core/Misc/tools";
+import { Scene } from "@babylonjs/core/scene";
+import { AdvancedDynamicTexture } from "@babylonjs/gui/2D/advancedDynamicTexture";
+import { Rectangle } from "@babylonjs/gui/2D/controls/rectangle";
+import { CheckboxGroup, RadioGroup, SelectionPanel } from "@babylonjs/gui/2D/controls/selector";
+import { IShowroomCameraArcRotateState, IShowroomCameraMatchmoveState, ShowroomCamera } from "@syntheticmagus/showroom-camera/lib/showroomCamera";
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
 import { Watch, WatchState } from "./watch";
-import { AdvancedDynamicTexture, CheckboxGroup, RadioGroup, Rectangle, SelectionPanel } from "@babylonjs/gui";
 import { WatchStuds } from "./watchStuds";
-import { IShowroomCameraArcRotateState, IShowroomCameraMatchmoveState, ShowroomCamera } from "@syntheticmagus/showroom-camera";
 
 export enum ShowroomState {
     Overall,
