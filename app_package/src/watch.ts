@@ -36,44 +36,44 @@ class WatchStateHelpers {
 }
 
 export class HotspotState {
+    public position: Vector2;
+    public isVisible: boolean;
+    
     constructor () {
         this.position = new Vector2();
         this.isVisible = false;
     }
-
-    position: Vector2;
-    isVisible: boolean;
 }
 
 export class Watch extends TransformNode {
-    private _animationWatchSpinUp: AnimationGroup;
-    private _animationWatchSpinDown: AnimationGroup;
-    private _animationOrbitOverall: AnimationGroup;
-    private _animationOrbitClasp: AnimationGroup;
-    private _animationOrbitFace: AnimationGroup;
-    private _animationOrbitLevitate: AnimationGroup;
-    private _animationHotspot0Visibility: AnimationGroup;
-    private _animationHotspot1Visibility: AnimationGroup;
+    private readonly _animationWatchSpinUp: AnimationGroup;
+    private readonly _animationWatchSpinDown: AnimationGroup;
+    private readonly _animationOrbitOverall: AnimationGroup;
+    private readonly _animationOrbitClasp: AnimationGroup;
+    private readonly _animationOrbitFace: AnimationGroup;
+    private readonly _animationOrbitLevitate: AnimationGroup;
+    private readonly _animationHotspot0Visibility: AnimationGroup;
+    private readonly _animationHotspot1Visibility: AnimationGroup;
 
-    private _bodyBone: Bone;
-    private _rootMesh: AbstractMesh;
+    private readonly _bodyBone: Bone;
+    private readonly _rootMesh: AbstractMesh;
 
-    private _cameraParentOverall: TransformNode;
-    private _cameraParentClasp: TransformNode;
-    private _cameraParentFace: TransformNode;
-    private _cameraParentLevitate: TransformNode;
+    private readonly _cameraParentOverall: TransformNode;
+    private readonly _cameraParentClasp: TransformNode;
+    private readonly _cameraParentFace: TransformNode;
+    private readonly _cameraParentLevitate: TransformNode;
 
-    private _hotspot0: TransformNode;
-    private _hotspot1: TransformNode;
-    private _hotspot2: TransformNode;
-    private _hotspot0Visibility: TransformNode;
-    private _hotspot1Visibility: TransformNode;
-    private _hotspot2Visibility: TransformNode;
+    private readonly _hotspot0: TransformNode;
+    private readonly _hotspot1: TransformNode;
+    private readonly _hotspot2: TransformNode;
+    private readonly _hotspot0Visibility: TransformNode;
+    private readonly _hotspot1Visibility: TransformNode;
+    private readonly _hotspot2Visibility: TransformNode;
 
     public hotspot0State: HotspotState;
     public hotspot1State: HotspotState;
     public hotspot2State: HotspotState;
-    public onHotspotsUpdatedObservable: Observable<void>;
+    public readonly onHotspotsUpdatedObservable: Observable<void>;
 
     private _state: WatchState;
 
@@ -93,7 +93,7 @@ export class Watch extends TransformNode {
         return this._cameraParentLevitate;
     }
 
-    private constructor (scene: Scene, importWatchResult: ISceneLoaderAsyncResult) {
+    private constructor(scene: Scene, importWatchResult: ISceneLoaderAsyncResult) {
         super("watchRoot", scene);
 
         importWatchResult.meshes[0].parent = this;
@@ -168,8 +168,8 @@ export class Watch extends TransformNode {
             while (true) {
                 const date = new Date();
                 let hours = date.getHours() % 12;
-                hoursMinutes.text = (hours === 0 ? 12 : hours) + ":" + ("00" + date.getMinutes().toString()).slice(-2);
-                seconds.text = ":" + ("00" + date.getSeconds()).slice(-2);
+                hoursMinutes.text = `${hours === 0 ? 12 : hours}:${`00${date.getMinutes()}`.slice(-2)}`;
+                seconds.text = `:${`00${date.getSeconds()}`.slice(-2)}`;
                 yield Tools.DelayAsync(1000);
             }
         }());
@@ -268,7 +268,6 @@ export class Watch extends TransformNode {
         }
 
         this._state = newState;
-        return;
     }
 
     private *_updateClaspHotspotVisibilityCoroutine() {

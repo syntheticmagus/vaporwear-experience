@@ -6,7 +6,7 @@ import { Scene } from "@babylonjs/core/scene";
 import { IVaporwearExperienceParams } from "./iVaporwearExperienceParams";
 
 export class WatchStuds {
-    private _mesh: AbstractMesh;
+    private readonly _mesh: AbstractMesh;
     public get Mesh(): AbstractMesh {
         return this._mesh;
     }

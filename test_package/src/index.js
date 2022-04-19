@@ -1,7 +1,7 @@
 import { VaporwearExperience } from "app_package";
 
-document.body.style.width = window.innerWidth + "px";
-document.body.style.height = window.innerHeight + "px";
+document.body.style.width = `${window.innerWidth}px`;
+document.body.style.height = `${window.innerHeight}px`;
 document.body.style.margin = "0";
 document.body.style.padding = "0";
 document.body.style.overflow = "hidden";
@@ -21,8 +21,8 @@ canvas.style.border = "0px";
 div.appendChild(canvas);
 
 window.addEventListener("resize", () => {
-    canvas.style.width = window.innerWidth + "px";
-    canvas.style.height = window.innerHeight + "px";
+    canvas.style.width = `${window.innerWidth}px`;
+    canvas.style.height = `${window.innerHeight}px`;
 });
 
 let assetsHostUrl;

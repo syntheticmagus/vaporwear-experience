@@ -44,6 +44,7 @@ export class VaporwearExperience {
      * @returns a promise that resolves when the experience is ready to use
      */
     public static async CreateAsync(params: IVaporwearExperienceParams): Promise<VaporwearExperience> {
+        // https://doc.babylonjs.com/divingDeeper/3D_commerce_certif#certified-viewer-version-based-on-babylonjs-engine
         SceneLoader.OnPluginActivatedObservable.add((plugin) => {
             if (plugin.name === "gltf") {
                 const loader = plugin as GLTFFileLoader;

@@ -24,27 +24,27 @@ export enum ShowroomState {
 }
 
 export class Showroom {
-    private _scene: Scene;
+    private readonly _scene: Scene;
 
     public get scene(): Scene {
         return this._scene;
     }
 
     private _state: ShowroomState;
-    private _stateSetToConfigurationObservable: Observable<void>;
+    private readonly _stateSetToConfigurationObservable: Observable<void>;
 
-    private _watch: Watch;
+    private readonly _watch: Watch;
     private _studs?: WatchStuds;
 
-    private _camera: ShowroomCamera;
+    private readonly _camera: ShowroomCamera;
 
-    private _overallState: IShowroomCameraMatchmoveState;
-    private _claspState: IShowroomCameraMatchmoveState;
-    private _faceState: IShowroomCameraMatchmoveState;
-    private _levitateState: IShowroomCameraMatchmoveState;
-    private _configureState: IShowroomCameraArcRotateState;
+    private readonly _overallState: IShowroomCameraMatchmoveState;
+    private readonly _claspState: IShowroomCameraMatchmoveState;
+    private readonly _faceState: IShowroomCameraMatchmoveState;
+    private readonly _levitateState: IShowroomCameraMatchmoveState;
+    private readonly _configureState: IShowroomCameraArcRotateState;
 
-    public onHotspotUpdatedObservable: Observable<{ hotspotId: number, visible: boolean, x: number, y: number }>;
+    public readonly onHotspotUpdatedObservable: Observable<{ hotspotId: number, visible: boolean, x: number, y: number }>;
     
     public get state(): ShowroomState {
         return this._state;
@@ -132,7 +132,7 @@ export class Showroom {
         };
         this._configureState = {
             startingPosition: this._watch.cameraParentOverall.absolutePosition.clone(),
-            target: (this._watch.cameraParentOverall.parent! as TransformNode).absolutePosition.clone(),
+            target: (this._watch.cameraParentOverall.parent as TransformNode).absolutePosition.clone(),
             lowerRadiusLimit: 3,
             upperRadiusLimit: 15
         };
@@ -141,14 +141,13 @@ export class Showroom {
         this._camera.setToMatchmoveState(this._overallState);
         this._state = ShowroomState.Overall;
 
-        const configurationPromise = new Promise<void>((resolve) => 
-        {
+        const configurationPromise = new Promise<void>((resolve) => {
             this._stateSetToConfigurationObservable.addOnce(() => {
                 resolve();
             });
         });
 
-        fetch(params.assetUrlRoot + "/" + params.assetUrlWatchStuds);
+        fetch(`${params.assetUrlRoot}/${params.assetUrlWatchStuds}`);
         const studsPromise = configurationPromise.then(() => {
             return WatchStuds.CreateAsync(scene, params);
         });
@@ -159,7 +158,7 @@ export class Showroom {
             watch.attachToBodyBone(studs.Mesh);
         });
         
-        fetch(params.assetUrlRoot + "/" + params.assetUrlWatchMaterials);
+        fetch(`${params.assetUrlRoot}/${params.assetUrlWatchMaterials}`);
         const materialsPromise = configurationPromise.then(() => {
             return SceneLoader.ImportMeshAsync("", params.assetUrlRoot, params.assetUrlWatchMaterials, scene).then((result) => {
             result.meshes[0].setEnabled(false);
